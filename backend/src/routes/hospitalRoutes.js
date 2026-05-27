@@ -1,7 +1,6 @@
 import express from "express";
 import {
   registerHospital,
-  loginHospital,
 } from "../controllers/hospitalController.js";
 
 import { upload } from "../middlewares/upload.js";
