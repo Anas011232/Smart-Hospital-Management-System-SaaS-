@@ -1,182 +1,301 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const router = useRouter();
-  const [showRegister, setShowRegister] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  const slides = [
+    "https://images.unsplash.com/photo-1586773860418-d37222d8fce3",
+    "https://images.unsplash.com/photo-1580281657527-47f249e8f46f",
+    "https://images.unsplash.com/photo-1584467735871-8e85353a8413",
+    "https://images.unsplash.com/photo-1551190822-a9333d879b1f",
+  ];
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setIndex((prev) => (prev + 1) % slides.length);
+    }, 4000);
+
+    return () => clearInterval(t);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white">
+    <div className="relative min-h-screen bg-black text-white overflow-x-hidden">
+
+      {/* BACKGROUND SLIDER */}
+      <div className="fixed inset-0 -z-10">
+        {slides.map((img, i) => (
+          <div
+            key={i}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              i === index ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              backgroundImage: `url(${img})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "brightness(0.25)",
+              transform: "scale(1.08)",
+            }}
+          />
+        ))}
+
+        <div className="absolute inset-0 bg-black/70" />
+      </div>
 
       {/* NAVBAR */}
-      <nav className="flex justify-between items-center px-8 py-5 border-b border-gray-800 backdrop-blur-md sticky top-0 bg-gray-950/70">
-        <h1 className="text-2xl font-bold text-blue-500">MedQube</h1>
+      <nav className="sticky top-0 z-50 flex justify-between items-center px-6 md:px-12 py-4 border-b border-white/10 backdrop-blur-xl bg-black/40">
+        <h1 className="text-xl md:text-2xl font-bold text-cyan-400">
+          MedQube
+        </h1>
 
-        <div className="flex gap-4">
-          <button onClick={() => router.push("/login")}
-            className="hover:text-blue-400 transition">
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push("/login")}
+            className="px-4 py-2 text-sm rounded-lg border border-white/20 hover:bg-white/10 transition"
+          >
             Login
           </button>
 
           <button
-            onClick={() => setShowRegister(!showRegister)}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 transition"
+            onClick={() => router.push("/register/hospital")}
+            className="px-4 py-2 text-sm rounded-lg bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition"
           >
             Get Started
           </button>
         </div>
       </nav>
 
-      {/* HERO */}
-      <main className="text-center px-6 py-24">
-        <h2 className="text-5xl md:text-6xl font-bold leading-tight">
-          Smart Hospital Management <br />
-          <span className="text-blue-500">System for Modern Healthcare</span>
-        </h2>
+      {/* HERO (SMALL SLIDER HEIGHT) */}
+      <section className="relative flex flex-col items-center justify-center text-center px-6 h-[65vh]">
 
-        <p className="text-gray-400 max-w-2xl mx-auto mt-6 text-lg">
-          Manage patients, doctors, queues, and appointments in real-time.
-          Built for hospitals that want to go fully digital.
+        <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
+          Smart Hospital <br />
+          <span className="text-cyan-400">Management System</span>
+        </h1>
+
+        <p className="text-gray-300 max-w-2xl mt-4 text-base md:text-lg">
+          Next-generation SaaS platform for hospitals, doctors, and patients with real-time operations.
         </p>
 
-        <div className="flex justify-center gap-4 mt-10 flex-wrap">
+        {/* CTA */}
+        <div className="flex flex-wrap justify-center gap-3 mt-8">
 
           <button
             onClick={() => router.push("/login")}
-            className="px-8 py-4 bg-blue-600 rounded-xl font-semibold hover:bg-blue-500 transition"
+            className="px-6 py-3 rounded-xl bg-white text-black font-semibold hover:scale-105 transition"
           >
-            Login to Dashboard
+            Enter Dashboard
           </button>
 
           <button
             onClick={() => router.push("/register/hospital")}
-            className="px-8 py-4 bg-gray-800 rounded-xl font-semibold hover:bg-gray-700 transition"
+            className="px-6 py-3 rounded-xl bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition"
           >
             Register Hospital
           </button>
 
           <button
             onClick={() => router.push("/register/patient")}
-            className="px-8 py-4 bg-gray-800 rounded-xl font-semibold hover:bg-gray-700 transition"
+            className="px-6 py-3 rounded-xl border border-white/30 hover:bg-white/10 transition"
           >
             Patient Signup
           </button>
 
         </div>
-      </main>
 
-      {/* FEATURES */}
-      <section className="py-20 px-6 bg-gray-900">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+        {/* SLIDER DOTS */}
+        <div className="absolute bottom-6 flex gap-2">
+          {slides.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === index ? "w-6 bg-cyan-400" : "w-2 bg-white/30"
+              }`}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* TRUST SECTION */}
+      <section className="py-20 px-6 md:px-12 grid md:grid-cols-3 gap-8">
+
+        {[
+          {
+            title: "Trusted by Hospitals",
+            desc: "Used by growing healthcare networks worldwide",
+          },
+          {
+            title: "Secure System",
+            desc: "End-to-end encrypted patient data protection",
+          },
+          {
+            title: "Real-Time Updates",
+            desc: "Instant queue & doctor availability tracking",
+          },
+        ].map((item, i) => (
+          <div
+            key={i}
+            className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition"
+          >
+            <h3 className="text-cyan-300 font-bold text-lg">
+              {item.title}
+            </h3>
+            <p className="text-gray-400 mt-2">{item.desc}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* STATS */}
+      <section className="py-20 px-6 md:px-12 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+
+          {[
+            { count: "500+", label: "Hospitals" },
+            { count: "10K+", label: "Doctors" },
+            { count: "1M+", label: "Patients" },
+            { count: "99.9%", label: "Uptime" },
+          ].map((s, i) => (
+            <div key={i}>
+              <div className="text-3xl md:text-4xl font-extrabold">
+                {s.count}
+              </div>
+              <div className="text-gray-400 mt-2">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="py-20 px-6 md:px-12">
+        <h2 className="text-3xl font-bold text-center mb-12">
+          How MedQube Works
+        </h2>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
 
           {[
             {
-              title: "Live Queue System",
-              desc: "Patients can track live serial updates in real-time."
+              step: "1",
+              title: "Register Hospital",
+              desc: "Create your hospital account in minutes",
             },
             {
-              title: "Doctor Management",
-              desc: "Hospitals can add, remove, and manage doctors easily."
+              step: "2",
+              title: "Add Doctors & Staff",
+              desc: "Manage departments and schedules easily",
             },
             {
-              title: "Digital Prescription",
-              desc: "Automated prescriptions and patient history tracking."
-            }
-          ].map((f, i) => (
-            <div key={i}
-              className="p-8 bg-gray-950 border border-gray-800 rounded-2xl hover:scale-105 transition">
-              <h3 className="text-xl font-bold text-blue-400 mb-2">
-                {f.title}
+              step: "3",
+              title: "Go Digital",
+              desc: "Start managing patients in real-time",
+            },
+          ].map((s, i) => (
+            <div
+              key={i}
+              className="p-8 rounded-2xl border border-white/10 bg-black/40"
+            >
+              <div className="text-cyan-400 text-3xl font-bold">
+                {s.step}
+              </div>
+              <h3 className="text-xl font-semibold mt-3">
+                {s.title}
               </h3>
-              <p className="text-gray-400">{f.desc}</p>
+              <p className="text-gray-400 mt-2">{s.desc}</p>
             </div>
           ))}
 
         </div>
       </section>
 
-      {/* REGISTER SECTION (PATIENT QUICK REGISTER) */}
-      {showRegister && (
-        <section className="py-20 px-6 bg-black/40 backdrop-blur-lg">
-          <div className="max-w-md mx-auto bg-gray-900 p-8 rounded-2xl border border-gray-800">
+      {/* FEATURES */}
+      <section className="py-20 px-6 md:px-12">
+        <h2 className="text-3xl font-bold text-center mb-12">
+          Powerful Features
+        </h2>
 
-            <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">
-              Quick Patient Register
-            </h2>
+        <div className="grid md:grid-cols-3 gap-8">
 
-            <input className="w-full mb-3 p-3 bg-gray-800 rounded"
-              placeholder="Name" />
-
-            <input className="w-full mb-3 p-3 bg-gray-800 rounded"
-              placeholder="Email" />
-
-            <input className="w-full mb-3 p-3 bg-gray-800 rounded"
-              placeholder="Phone" />
-
-            <input className="w-full mb-3 p-3 bg-gray-800 rounded"
-              type="password"
-              placeholder="Password" />
-
-            <button
-              className="w-full py-3 bg-blue-600 rounded-xl hover:bg-blue-500"
-              onClick={() => router.push("/register/patient")}
+          {[
+            "Live Queue System",
+            "Doctor Dashboard",
+            "Digital Prescription",
+            "Patient Records",
+            "Emergency System",
+            "Analytics Dashboard",
+          ].map((t, i) => (
+            <div
+              key={i}
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:scale-105 transition"
             >
-              Continue Full Registration
-            </button>
-
-          </div>
-        </section>
-      )}
-
-      {/* PRICING */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-
-          <h2 className="text-3xl font-bold mb-12">
-            Subscription Plans
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-8">
-
-            <div className="p-8 bg-gray-900 rounded-2xl border border-blue-600">
-              <h3 className="text-xl font-bold">Hospital Plan</h3>
-              <p className="text-4xl font-bold my-4">৳1000 /month</p>
-              <p className="text-gray-400 mb-6">
-                Full hospital management system access
+              <h3 className="text-cyan-300 font-bold text-lg">{t}</h3>
+              <p className="text-gray-400 mt-2">
+                Smart automation for healthcare workflow.
               </p>
-
-              <button
-                onClick={() => router.push("/register/hospital")}
-                className="w-full py-3 bg-blue-600 rounded-xl hover:bg-blue-500"
-              >
-                Start Hospital
-              </button>
             </div>
+          ))}
 
-            <div className="p-8 bg-gray-900 rounded-2xl border border-gray-700">
-              <h3 className="text-xl font-bold">Patient Access</h3>
-              <p className="text-4xl font-bold my-4">Free</p>
-              <p className="text-gray-400 mb-6">
-                Book appointments & track doctors
-              </p>
-
-              <button
-                onClick={() => router.push("/register/patient")}
-                className="w-full py-3 bg-gray-700 rounded-xl hover:bg-gray-600"
-              >
-                Join as Patient
-              </button>
-            </div>
-
-          </div>
         </div>
       </section>
 
+      {/* CTA */}
+      <section className="py-24 px-6 md:px-12 text-center">
+        <h2 className="text-4xl font-bold">
+          Ready to Transform Healthcare?
+        </h2>
+
+        <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
+          Join MedQube and bring your hospital into the digital era.
+        </p>
+
+        <button
+          onClick={() => router.push("/register/hospital")}
+          className="mt-8 px-10 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:scale-105 transition"
+        >
+          Get Started Now
+        </button>
+      </section>
+
       {/* FOOTER */}
-      <footer className="text-center text-gray-500 py-10 border-t border-gray-800">
-        © 2026 MedQube — Smart Healthcare System
+      <footer className="border-t border-white/10 px-6 md:px-12 py-16">
+
+        <div className="grid md:grid-cols-4 gap-10 text-gray-400">
+
+          <div>
+            <h3 className="text-white font-bold mb-3">MedQube</h3>
+            <p>Smart hospital SaaS platform for modern healthcare systems.</p>
+          </div>
+
+          <div>
+            <h3 className="text-white font-bold mb-3">Product</h3>
+            <p>Features</p>
+            <p>Pricing</p>
+            <p>Security</p>
+          </div>
+
+          <div>
+            <h3 className="text-white font-bold mb-3">Company</h3>
+            <p>About</p>
+            <p>Careers</p>
+            <p>Contact</p>
+          </div>
+
+          <div>
+            <h3 className="text-white font-bold mb-3">Legal</h3>
+            <p>Privacy Policy</p>
+            <p>Terms</p>
+            <p>Support</p>
+          </div>
+
+        </div>
+
+        <div className="text-center text-gray-500 mt-10">
+          © 2026 MedQube — All rights reserved
+        </div>
+
       </footer>
 
     </div>
