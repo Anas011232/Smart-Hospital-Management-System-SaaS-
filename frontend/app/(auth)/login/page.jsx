@@ -1,4 +1,3 @@
-//A problem occurs.
 "use client";
 
 import { useState } from "react";
@@ -8,6 +7,7 @@ import {
   ShieldCheck,
   Sparkles,
   Activity,
+  UserCog,
 } from "lucide-react";
 
 export default function Login() {
@@ -16,6 +16,7 @@ export default function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
+    role: "patient",
   });
 
   const handleLogin = async () => {
@@ -35,25 +36,37 @@ export default function Login() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+        alert(data.message || "Login Failed");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
       if (data.user?.role === "hospital") {
         window.location.href = "/hospital/dashboard";
+        return;
       }
 
       if (data.user?.role === "patient") {
         window.location.href = "/patient-dashboard";
+        return;
       }
 
       if (data.user?.role === "doctor") {
         window.location.href = "/doctor-dashboard";
+        return;
       }
 
       if (data.user?.role === "admin") {
         window.location.href = "/admin-dashboard";
+        return;
       }
 
     } catch (err) {
-      console.log(err);
-      alert("Login Failed ❌");
+      console.error(err);
+      alert("Server Connection Failed");
     } finally {
       setLoading(false);
     }
@@ -70,6 +83,7 @@ export default function Login() {
         <div className="absolute bottom-[-150px] right-[-100px] w-[400px] h-[400px] bg-blue-300/40 rounded-full blur-3xl animate-pulse"></div>
 
         <div className="absolute top-[40%] left-[45%] w-[220px] h-[220px] bg-purple-300/30 rounded-full blur-3xl"></div>
+
       </div>
 
       {/* Grid */}
@@ -95,6 +109,7 @@ export default function Login() {
                 <span className="text-xs font-semibold tracking-[3px] uppercase text-cyan-700">
                   Secure Access
                 </span>
+
               </div>
 
               <div className="mt-7 flex justify-center">
@@ -102,7 +117,9 @@ export default function Login() {
                 <div className="w-20 h-20 rounded-3xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 flex items-center justify-center shadow-2xl">
 
                   <ShieldCheck className="text-white" size={38} />
+
                 </div>
+
               </div>
 
               <h1 className="mt-6 text-4xl font-black">
@@ -110,11 +127,13 @@ export default function Login() {
                 <span className="bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Welcome Back
                 </span>
+
               </h1>
 
               <p className="mt-3 text-gray-600 text-sm">
                 Login to continue your healthcare journey
               </p>
+
             </div>
 
             {/* Inputs */}
@@ -124,6 +143,7 @@ export default function Login() {
                 icon={<Mail size={18} />}
                 type="email"
                 placeholder="Email Address"
+                value={form.email}
                 onChange={(e) =>
                   setForm({
                     ...form,
@@ -136,6 +156,7 @@ export default function Login() {
                 icon={<Lock size={18} />}
                 type="password"
                 placeholder="Password"
+                value={form.password}
                 onChange={(e) =>
                   setForm({
                     ...form,
@@ -143,6 +164,32 @@ export default function Login() {
                   })
                 }
               />
+
+              {/* Role Select */}
+              <div className="flex items-center rounded-2xl border border-gray-200 bg-white/80 overflow-hidden transition-all duration-300 focus-within:border-cyan-400">
+
+                <div className="px-4 text-cyan-600 flex items-center justify-center">
+                  <UserCog size={18} />
+                </div>
+
+                <select
+                  value={form.role}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      role: e.target.value,
+                    })
+                  }
+                  className="w-full bg-transparent px-4 py-4 outline-none text-gray-800"
+                >
+                  <option value="patient">Patient</option>
+                  <option value="hospital">Hospital</option>
+                  <option value="doctor">Doctor</option>
+                  <option value="admin">Admin</option>
+                </select>
+
+              </div>
+
             </div>
 
             {/* Login Button */}
@@ -161,23 +208,24 @@ export default function Login() {
                 <Activity size={18} />
 
                 {loading ? "Logging in..." : "Login"}
+
               </span>
+
             </button>
 
-            {/* Footer */}
             <p className="text-center text-sm text-gray-500 mt-6">
               Secure Healthcare Authentication System
             </p>
+
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }
-
-/* =========================
-   Components
-========================= */
 
 const Input = ({ icon, ...props }) => {
   return (
@@ -191,7 +239,7 @@ const Input = ({ icon, ...props }) => {
         {...props}
         className="w-full bg-transparent px-4 py-4 leading-normal outline-none text-gray-800 placeholder:text-gray-400"
       />
+
     </div>
   );
 };
-
