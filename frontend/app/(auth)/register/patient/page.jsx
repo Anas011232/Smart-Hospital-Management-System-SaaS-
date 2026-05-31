@@ -42,34 +42,40 @@ export default function PatientRegister() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await fetch(
-        "http://localhost:5000/api/patient/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
-      );
+    const res = await fetch(
+      "http://localhost:5000/api/patient/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      }
+    );
 
-      const data = await res.json();
+    const data = await res.json();
 
-      console.log(data);
-
+    if (res.ok) {
       alert("Patient Registered Successfully ✅");
-    } catch (err) {
-      console.log(err);
-      alert("Something went wrong ❌");
-    } finally {
-      setLoading(false);
+
+      window.location.href = "/patient-dashboard";
+      return;
     }
-  };
+
+    alert(data.message || "Registration Failed ❌");
+
+  } catch (err) {
+    console.log(err);
+    alert("Something went wrong ❌");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-100 via-cyan-50 to-blue-100">
