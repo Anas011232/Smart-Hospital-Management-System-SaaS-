@@ -9,8 +9,13 @@ export default function EditDoctor() {
   const router = useRouter();
 
   const [form, setForm] = useState({});
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // =====================
+  // LOAD DOCTOR
+  // =====================
   const loadDoctor = async () => {
     try {
       const res = await axios.get(
@@ -28,17 +33,49 @@ export default function EditDoctor() {
     loadDoctor();
   }, []);
 
+  // =====================
+  // HANDLE INPUT
+  // =====================
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // =====================
+  // IMAGE HANDLER
+  // =====================
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  // =====================
+  // UPDATE DOCTOR
+  // =====================
   const updateDoctor = async (e) => {
     e.preventDefault();
 
     try {
+      const data = new FormData();
+
+      Object.keys(form).forEach((key) => {
+        data.append(key, form[key]);
+      });
+
+      if (image) {
+        data.append("photo", image);
+      }
+
       await axios.put(
         `http://localhost:5000/api/doctors/${id}`,
-        form
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
       router.push("/hospital/doctors");
@@ -47,6 +84,9 @@ export default function EditDoctor() {
     }
   };
 
+  // =====================
+  // LOADING
+  // =====================
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white bg-slate-950">
@@ -55,19 +95,52 @@ export default function EditDoctor() {
     );
   }
 
+  // =====================
+  // UI
+  // =====================
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-6 flex items-center justify-center">
 
       <div className="w-full max-w-4xl backdrop-blur-xl bg-white/10 border border-white/10 rounded-3xl shadow-2xl p-8">
 
         {/* HEADER */}
-        <div className="mb-8 text-center">
+        <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">
             Edit <span className="text-cyan-400">Doctor</span>
           </h1>
           <p className="text-slate-400 mt-2">
-            Update doctor information
+            Update doctor profile information
           </p>
+        </div>
+
+        {/* IMAGE UPLOAD */}
+        <div className="flex flex-col items-center mb-8">
+
+          <div className="w-28 h-28 rounded-full overflow-hidden border border-slate-600 bg-white/5 flex items-center justify-center">
+
+            {preview ? (
+              <img src={preview} className="w-full h-full object-cover" />
+            ) : form.photo ? (
+              <img
+                src={`http://localhost:5000${form.photo}`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-slate-400 text-sm">Photo</span>
+            )}
+
+          </div>
+
+          <label className="mt-2 text-cyan-400 cursor-pointer text-sm">
+            Change Photo
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImage}
+              className="hidden"
+            />
+          </label>
+
         </div>
 
         {/* FORM */}
@@ -75,35 +148,38 @@ export default function EditDoctor() {
           onSubmit={updateDoctor}
           className="grid grid-cols-1 md:grid-cols-2 gap-5"
         >
-          {Object.keys(form).map((key) => (
-            <div key={key} className="flex flex-col">
-              <label className="text-sm text-slate-300 mb-2 capitalize">
-                {key}
-              </label>
+          {Object.keys(form).map((key) => {
+            if (key === "_id" || key === "photo") return null;
 
-              <input
-                name={key}
-                value={form[key] || ""}
-                onChange={handleChange}
-                className="
-                  p-3
-                  rounded-xl
-                  bg-white/5
-                  border
-                  border-slate-700
-                  text-white
-                  outline-none
-                  transition
-                  duration-300
-                  focus:border-cyan-400
-                  focus:ring-2
-                  focus:ring-cyan-500/30
-                  hover:border-slate-500
-                "
-                placeholder={`Enter ${key}`}
-              />
-            </div>
-          ))}
+            return (
+              <div key={key} className="flex flex-col">
+                <label className="text-sm text-slate-300 mb-2 capitalize">
+                  {key}
+                </label>
+
+                <input
+                  name={key}
+                  value={form[key] || ""}
+                  onChange={handleChange}
+                  className="
+                    p-3
+                    rounded-xl
+                    bg-white/5
+                    border
+                    border-slate-700
+                    text-white
+                    outline-none
+                    transition
+                    duration-300
+                    focus:border-cyan-400
+                    focus:ring-2
+                    focus:ring-cyan-500/30
+                    hover:border-slate-500
+                  "
+                />
+              </div>
+            );
+          })}
 
           {/* BUTTON */}
           <div className="md:col-span-2 mt-6">
@@ -128,6 +204,7 @@ export default function EditDoctor() {
               Update Doctor
             </button>
           </div>
+
         </form>
 
       </div>
