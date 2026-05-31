@@ -18,46 +18,59 @@ export const createDoctor = async (req, res) => {
     console.log("🔥 BODY:", req.body);
     console.log("📸 FILE:", req.file);
 
+    // =========================
+    // SAFE HELPERS
+    // =========================
+    const safeString = (v) => (v && v !== "undefined" ? v : "");
+    const safeNumber = (v) => (v && !isNaN(v) ? Number(v) : 0);
+
+    let hospitalId = null;
+
+    if (
+      req.body.hospitalId &&
+      req.body.hospitalId !== "undefined" &&
+      ObjectId.isValid(req.body.hospitalId)
+    ) {
+      hospitalId = new ObjectId(req.body.hospitalId);
+    }
+
     const doctor = {
-      hospitalId:
-        ObjectId.isValid(req.body.hospitalId)
-          ? new ObjectId(req.body.hospitalId)
-          : null,
+      hospitalId,
 
-      fullName: req.body.fullName || "",
+      fullName: safeString(req.body.fullName),
 
-      // ✅ FIXED IMAGE UPLOAD
       photo: req.file ? `/uploads/${req.file.filename}` : "",
 
-      email: req.body.email || "",
-      password: req.body.password || "",
-      phone: req.body.phone || "",
-      gender: req.body.gender || "",
-      dateOfBirth: req.body.dateOfBirth || "",
+      email: safeString(req.body.email),
+      password: safeString(req.body.password),
+      phone: safeString(req.body.phone),
+      gender: safeString(req.body.gender),
+      dateOfBirth: safeString(req.body.dateOfBirth),
 
-      bloodGroup: req.body.bloodGroup || "",
-      address: req.body.address || "",
-      nidNumber: req.body.nidNumber || "",
+      bloodGroup: safeString(req.body.bloodGroup),
+      address: safeString(req.body.address),
+      nidNumber: safeString(req.body.nidNumber),
 
-      specialization: req.body.specialization || "",
-      designation: req.body.designation || "",
-      department: req.body.department || "",
+      specialization: safeString(req.body.specialization),
+      designation: safeString(req.body.designation),
+      department: safeString(req.body.department),
 
-      qualification: req.body.qualification || "",
-      experienceYears: Number(req.body.experienceYears) || 0,
+      qualification: safeString(req.body.qualification),
 
-      medicalRegistrationNumber: req.body.medicalRegistrationNumber || "",
-      licenseNumber: req.body.licenseNumber || "",
+      experienceYears: safeNumber(req.body.experienceYears),
 
-      consultationFee: Number(req.body.consultationFee) || 0,
+      medicalRegistrationNumber: safeString(req.body.medicalRegistrationNumber),
+      licenseNumber: safeString(req.body.licenseNumber),
+
+      consultationFee: safeNumber(req.body.consultationFee),
 
       availableDays: toArray(req.body.availableDays),
-      startTime: req.body.startTime || "",
-      endTime: req.body.endTime || "",
+      startTime: safeString(req.body.startTime),
+      endTime: safeString(req.body.endTime),
 
-      maxPatientsPerDay: Number(req.body.maxPatientsPerDay) || 0,
+      maxPatientsPerDay: safeNumber(req.body.maxPatientsPerDay),
 
-      bio: req.body.bio || "",
+      bio: safeString(req.body.bio),
       languages: toArray(req.body.languages),
 
       totalPatients: 0,

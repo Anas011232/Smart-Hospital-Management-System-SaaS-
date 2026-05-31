@@ -3,7 +3,7 @@ import {
   registerHospital,
 } from "../controllers/hospitalController.js";
 
-import { upload } from "../middlewares/upload.js";
+import upload from "../middlewares/upload.js";
 
 const router = express.Router();
 
