@@ -8,12 +8,15 @@ const toArray = (value) => {
   return String(value).split(",").map((v) => v.trim());
 };
 
+// ===============================
 // CREATE DOCTOR
+// ===============================
 export const createDoctor = async (req, res) => {
   try {
     const db = getDB();
 
     console.log("🔥 BODY:", req.body);
+    console.log("📸 FILE:", req.file);
 
     const doctor = {
       hospitalId:
@@ -22,11 +25,12 @@ export const createDoctor = async (req, res) => {
           : null,
 
       fullName: req.body.fullName || "",
-      photo: req.body.photo || "",
+
+      // ✅ FIXED IMAGE UPLOAD
+      photo: req.file ? `/uploads/${req.file.filename}` : "",
 
       email: req.body.email || "",
       password: req.body.password || "",
-
       phone: req.body.phone || "",
       gender: req.body.gender || "",
       dateOfBirth: req.body.dateOfBirth || "",
@@ -42,8 +46,7 @@ export const createDoctor = async (req, res) => {
       qualification: req.body.qualification || "",
       experienceYears: Number(req.body.experienceYears) || 0,
 
-      medicalRegistrationNumber:
-        req.body.medicalRegistrationNumber || "",
+      medicalRegistrationNumber: req.body.medicalRegistrationNumber || "",
       licenseNumber: req.body.licenseNumber || "",
 
       consultationFee: Number(req.body.consultationFee) || 0,
@@ -52,8 +55,7 @@ export const createDoctor = async (req, res) => {
       startTime: req.body.startTime || "",
       endTime: req.body.endTime || "",
 
-      maxPatientsPerDay:
-        Number(req.body.maxPatientsPerDay) || 0,
+      maxPatientsPerDay: Number(req.body.maxPatientsPerDay) || 0,
 
       bio: req.body.bio || "",
       languages: toArray(req.body.languages),
@@ -86,15 +88,14 @@ export const createDoctor = async (req, res) => {
   }
 };
 
-// GET ALL
+// ===============================
+// GET ALL DOCTORS
+// ===============================
 export const getDoctors = async (req, res) => {
   try {
     const db = getDB();
 
-    const doctors = await db
-      .collection("doctors")
-      .find()
-      .toArray();
+    const doctors = await db.collection("doctors").find().toArray();
 
     res.json({ success: true, doctors });
   } catch (err) {
@@ -106,7 +107,9 @@ export const getDoctors = async (req, res) => {
   }
 };
 
-// GET BY ID
+// ===============================
+// GET DOCTOR BY ID
+// ===============================
 export const getDoctorById = async (req, res) => {
   try {
     const db = getDB();
@@ -132,21 +135,28 @@ export const getDoctorById = async (req, res) => {
   }
 };
 
-// UPDATE
+// ===============================
+// UPDATE DOCTOR (FIXED IMAGE)
+// ===============================
 export const updateDoctor = async (req, res) => {
   try {
     const db = getDB();
 
-    const { _id, ...rest } = req.body; // 🔥 REMOVE _id
+    const { _id, ...rest } = req.body;
+
+    const updateData = {
+      ...rest,
+      updatedAt: new Date(),
+    };
+
+    // ✅ IMAGE UPDATE FIX
+    if (req.file) {
+      updateData.photo = `/uploads/${req.file.filename}`;
+    }
 
     await db.collection("doctors").updateOne(
       { _id: new ObjectId(req.params.id) },
-      {
-        $set: {
-          ...rest,
-          updatedAt: new Date(),
-        },
-      }
+      { $set: updateData }
     );
 
     res.json({
@@ -162,7 +172,9 @@ export const updateDoctor = async (req, res) => {
   }
 };
 
-// DELETE
+// ===============================
+// DELETE DOCTOR
+// ===============================
 export const deleteDoctor = async (req, res) => {
   try {
     const db = getDB();
