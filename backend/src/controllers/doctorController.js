@@ -208,3 +208,17 @@ export const deleteDoctor = async (req, res) => {
     });
   }
 };
+
+export const getDoctorsByHospital = async (req, res) => {
+  const { hospitalId } = req.params;
+  const { search } = req.query;
+  const db = getDB();
+  
+  let query = { hospitalId: new ObjectId(hospitalId) };
+  if (search) {
+    query.fullName = { $regex: search, $options: 'i' };
+  }
+  
+  const doctors = await db.collection("doctors").find(query).toArray();
+  res.json({ success: true, doctors });
+};
