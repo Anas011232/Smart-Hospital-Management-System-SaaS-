@@ -1,0 +1,37 @@
+Cardiology:
+chest pain
+heart attack
+heart disease
+high blood pressure
+palpitation
+
+Neurology:
+headache
+migraine
+stroke
+brain injury
+dizziness
+
+Orthopedics:
+joint pain
+fracture
+bone pain
+arthritis
+
+Medicine:
+fever
+cough
+cold
+weakness
+infection
+
+Dermatology:
+skin rash
+acne
+eczema
+fungal infection
+
+Pediatrics:
+child fever
+newborn care
+child infection
