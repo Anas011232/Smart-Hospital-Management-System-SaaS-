@@ -1,5 +1,7 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import cors from "cors";
 
 import { connectDB } from "./config/db.js";
@@ -10,8 +12,6 @@ import patientRoutes from "./routes/patientRoutes.js";
 import doctorRoutes from "./routes/doctorRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 
-
-dotenv.config();
 connectDB();
 
 const app = express();
@@ -21,16 +21,13 @@ app.use(express.json());
 
 app.use("/uploads", express.static("uploads"));
 
-// ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/hospital", hospitalRoutes);
 app.use("/api/patient", patientRoutes);
 app.use("/api/doctors", doctorRoutes);
-app.use("/api/ai", aiRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Server Running 🚀");
-});
+// AI ROUTE
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 

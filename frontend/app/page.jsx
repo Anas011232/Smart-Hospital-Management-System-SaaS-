@@ -30,9 +30,8 @@ export default function HomePage() {
         {slides.map((img, i) => (
           <div
             key={i}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              i === index ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${i === index ? "opacity-100" : "opacity-0"
+              }`}
             style={{
               backgroundImage: `url(${img})`,
               backgroundSize: "cover",
@@ -65,6 +64,12 @@ export default function HomePage() {
             className="px-4 py-2 text-sm rounded-lg bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition"
           >
             Get Started
+          </button>
+          <button
+            onClick={() => router.push("/ai-doctor")}
+            className="px-4 py-2 text-sm rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 text-white font-semibold hover:scale-105 transition"
+          >
+            🤖 AI Assistant
           </button>
         </div>
       </nav>
@@ -112,9 +117,8 @@ export default function HomePage() {
           {slides.map((_, i) => (
             <div
               key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === index ? "w-6 bg-cyan-400" : "w-2 bg-white/30"
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? "w-6 bg-cyan-400" : "w-2 bg-white/30"
+                }`}
             />
           ))}
         </div>
