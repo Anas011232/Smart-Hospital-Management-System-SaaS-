@@ -113,3 +113,31 @@ export const rejectAppointment = async (
     });
   }
 };
+
+
+export const getDoctorAppointments = async (req, res) => {
+  try {
+    const db = getDB();
+
+    const doctorId = req.user.id;
+
+    const appointments = await db
+      .collection("appointments")
+      .find({
+        doctorId: new ObjectId(doctorId),
+      })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    res.json({
+      success: true,
+      appointments,
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
