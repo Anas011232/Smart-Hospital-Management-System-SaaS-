@@ -110,3 +110,4 @@ export const getAllHospitals = async (req, res) => {
     });
   }
 };
+
