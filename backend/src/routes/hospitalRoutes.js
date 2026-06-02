@@ -12,6 +12,7 @@ const router = express.Router();
 router.post("/register", upload.single("image"), registerHospital);
 router.get("/", getAllHospitals);
 
+
 // router.post("/login", loginHospital);
 
 export default router;

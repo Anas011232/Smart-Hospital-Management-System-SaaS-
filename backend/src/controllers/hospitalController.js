@@ -111,31 +111,3 @@ export const getAllHospitals = async (req, res) => {
   }
 };
 
-export const getMyHospital = async (req, res) => {
-  try {
-    const db = getDB();
-
-    const hospitalId = req.user.id; // 👈 token থেকে আসবে
-
-    const hospital = await db.collection("hospitals").findOne({
-      _id: new ObjectId(hospitalId),
-    });
-
-    if (!hospital) {
-      return res.status(404).json({
-        success: false,
-        message: "Hospital not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      hospital,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
