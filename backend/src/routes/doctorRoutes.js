@@ -1,9 +1,8 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
-
 import {
   createDoctor,
+  getDoctorsByHospital,
   getDoctors,
   getDoctorById,
   updateDoctor,
@@ -12,13 +11,8 @@ import {
 
 const router = express.Router();
 
-// =======================
-// MULTER CONFIG
-// =======================
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
+  destination: "uploads/",
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
   },
@@ -26,18 +20,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// =======================
-// ROUTES
-// =======================
-
-// 🔥 CREATE (WITH IMAGE)
 router.post("/", upload.single("photo"), createDoctor);
 
-// 🔥 UPDATE (WITH IMAGE)
+// ✅ ADD THIS (IMPORTANT)
 router.put("/:id", upload.single("photo"), updateDoctor);
 
-router.get("/", getDoctors);
-router.get("/:id", getDoctorById);
 router.delete("/:id", deleteDoctor);
+
+router.get("/hospital/:hospitalId", getDoctorsByHospital);
+
+router.get("/", getDoctors);
+
+router.get("/:id", getDoctorById);
 
 export default router;

@@ -8,7 +8,6 @@ export default function AddDoctor() {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    hospitalId: "",
     fullName: "",
     email: "",
     password: "",
@@ -36,11 +35,18 @@ export default function AddDoctor() {
 
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  // ===============================
+  // HANDLE INPUT
+  // ===============================
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // ===============================
+  // IMAGE
+  // ===============================
   const handleImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -49,141 +55,98 @@ export default function AddDoctor() {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ===============================
+  // SUBMIT
+  // ===============================
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const data = new FormData();
+  try {
+    const hospitalId = localStorage.getItem("hospitalId");
 
-      // 🔥 append all fields
-      Object.entries(form).forEach(([key, value]) => {
-        data.append(key, value || "");
-      });
+    console.log("HOSPITAL ID:", hospitalId);
 
-      // 🔥 IMPORTANT: backend expects req.file
-      if (image) {
-        data.append("photo", image);
-      }
-
-      await axios.post(
-        "http://localhost:5000/api/doctors",
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      router.push("/hospital/doctors");
-    } catch (err) {
-      console.error("CREATE ERROR:", err);
+    if (!hospitalId) {
+      alert("Hospital ID missing");
+      return;
     }
-  };
 
+    const data = new FormData();
+
+    Object.entries(form).forEach(([key, value]) => {
+      data.append(key, value || "");
+    });
+
+    data.append("hospitalId", hospitalId); // 🔥 IMPORTANT
+
+    if (image) {
+      data.append("photo", image);
+    }
+
+    await axios.post("http://localhost:5000/api/doctors", data);
+
+    router.push("/hospital/doctors");
+
+  } catch (err) {
+    console.log("ERROR:", err.response?.data);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // ===============================
+  // UI
+  // ===============================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-slate-950 text-white p-6">
 
-        {/* HEADER */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white">
-            Add New Doctor
-          </h1>
-          <p className="text-slate-400 mt-2">
-            Create professional doctor profile
-          </p>
+      <h1 className="text-3xl font-bold mb-6">
+        Add New Doctor
+      </h1>
+
+      <form
+        onSubmit={handleSubmit}
+        className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+
+        {/* INPUT FIELDS */}
+        {Object.entries(form).map(([key, value]) => (
+          <input
+            key={key}
+            name={key}
+            value={value}
+            onChange={handleChange}
+            placeholder={key}
+            className="p-3 rounded bg-slate-800 border border-slate-700"
+          />
+        ))}
+
+        {/* IMAGE UPLOAD */}
+        <div className="col-span-full">
+          <input type="file" onChange={handleImage} />
+
+          {preview && (
+            <img
+              src={preview}
+              alt="preview"
+              className="w-24 h-24 mt-3 rounded object-cover"
+            />
+          )}
         </div>
 
-        <div className="backdrop-blur-xl bg-white/10 border border-white/10 rounded-3xl shadow-2xl p-8">
-
-          {/* ================= IMAGE UPLOAD ================= */}
-          <div className="flex flex-col items-center mb-10">
-
-            <div className="w-32 h-32 rounded-full border-2 border-cyan-500 overflow-hidden bg-white/5 flex items-center justify-center shadow-lg">
-              {preview ? (
-                <img
-                  src={preview}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-slate-400 text-sm">
-                  Upload Photo
-                </span>
-              )}
-            </div>
-
-            <label className="mt-4 cursor-pointer text-cyan-400 hover:text-cyan-300 text-sm font-medium">
-              Choose Doctor Photo
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImage}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          {/* ================= FORM ================= */}
-          <form
-            onSubmit={handleSubmit}
-            className="grid lg:grid-cols-3 md:grid-cols-2 gap-5"
+        {/* BUTTON */}
+        <div className="col-span-full">
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-blue-600 px-6 py-3 rounded"
           >
-            {Object.entries(form).map(([key, value]) => (
-              <div key={key} className="flex flex-col">
-                <label className="mb-2 text-sm text-slate-300 capitalize">
-                  {key}
-                </label>
-
-                <input
-                  name={key}
-                  value={value}
-                  onChange={handleChange}
-                  className="
-                    w-full
-                    bg-white/5
-                    border
-                    border-slate-700
-                    text-white
-                    px-4
-                    py-3
-                    rounded-xl
-                    outline-none
-                    focus:border-cyan-400
-                    focus:ring-2
-                    focus:ring-cyan-500/30
-                    transition
-                  "
-                  placeholder={`Enter ${key}`}
-                />
-              </div>
-            ))}
-
-            {/* BUTTON */}
-            <div className="col-span-full mt-6">
-              <button
-                type="submit"
-                className="
-                  w-full
-                  bg-gradient-to-r
-                  from-cyan-500
-                  to-blue-600
-                  text-white
-                  font-semibold
-                  py-4
-                  rounded-2xl
-                  shadow-lg
-                  hover:scale-[1.02]
-                  transition
-                "
-              >
-                Save Doctor
-              </button>
-            </div>
-          </form>
-
+            {loading ? "Saving..." : "Save Doctor"}
+          </button>
         </div>
-      </div>
+
+      </form>
     </div>
   );
 }

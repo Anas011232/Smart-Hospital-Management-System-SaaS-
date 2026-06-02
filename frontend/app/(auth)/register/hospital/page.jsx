@@ -91,6 +91,8 @@ export default function HospitalRegister() {
 
     localStorage.setItem("token", data.token);
 
+    localStorage.setItem("hospitalId", data.hospital._id);
+
     router.push("/hospital/dashboard");
   };
 

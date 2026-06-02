@@ -11,6 +11,7 @@ import hospitalRoutes from "./routes/hospitalRoutes.js";
 import patientRoutes from "./routes/patientRoutes.js";
 import doctorRoutes from "./routes/doctorRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import appointmentRoutes from "./routes/appointmentRoutes.js";
 
 connectDB();
 
@@ -28,6 +29,8 @@ app.use("/api/doctors", doctorRoutes);
 
 // AI ROUTE
 app.use("/api/ai", aiRoutes);
+
+app.use("/api/appointments", appointmentRoutes);
 
 const PORT = process.env.PORT || 5000;
 

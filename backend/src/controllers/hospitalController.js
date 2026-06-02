@@ -94,9 +94,19 @@ export const registerHospital = async (req, res) => {
 };
 
 export const getAllHospitals = async (req, res) => {
-  const { search } = req.query;
-  const query = search ? { hospitalName: { $regex: search, $options: 'i' } } : {};
-  const db = getDB();
-  const hospitals = await db.collection("hospitals").find(query).toArray();
-  res.json({ success: true, hospitals });
+  try {
+    const db = getDB();
+
+    const hospitals = await db.collection("hospitals").find().toArray();
+
+    res.json({
+      success: true,
+      hospitals,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };
