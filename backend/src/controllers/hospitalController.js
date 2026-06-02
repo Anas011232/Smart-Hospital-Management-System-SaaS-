@@ -1,7 +1,46 @@
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 import { getDB } from "../config/db.js";
 import { generateToken } from "../utils/token.js";
 import { slugify } from "../utils/slug.js";
+
+export const getMyHospital = async (req, res) => {
+  try {
+    console.log("REQ USER =", req.user);
+
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const db = getDB();
+
+    const hospital = await db.collection("hospitals").findOne({
+      _id: new ObjectId(req.user.id),
+    });
+
+    if (!hospital) {
+      return res.status(404).json({
+        success: false,
+        message: "Hospital not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      hospital,
+    });
+  } catch (err) {
+    console.error("GET MY HOSPITAL ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
 
 export const registerHospital = async (req, res) => {
   try {
@@ -110,4 +149,7 @@ export const getAllHospitals = async (req, res) => {
     });
   }
 };
+
+
+
 

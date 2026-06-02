@@ -1,33 +1,51 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import api from "@/lib/axios";
 
 export default function Dashboard() {
+  const [hospital, setHospital] =
+    useState(null);
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token");
+
+    api
+      .get("/hospital/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setHospital(res.data.hospital);
+      });
+  }, []);
+
+  if (!hospital)
+    return <p>Loading...</p>;
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-10">
-      <h1 className="text-3xl font-bold">
-        Hospital Dashboard
+    <div>
+      <h1>
+        {hospital.hospitalName}
       </h1>
 
-      <p className="text-gray-400 mt-2">
-        Manage your doctors efficiently 🚀
+      <p>{hospital.email}</p>
+
+      <p>{hospital.phone}</p>
+
+      <p>{hospital.address}</p>
+
+      <p>
+        Total Doctors:
+        {hospital.totalDoctors}
       </p>
 
-      <div className="mt-8 flex gap-4">
-        <Link
-          href="/hospital/doctors/add"
-          className="bg-green-600 px-5 py-3 rounded"
-        >
-          + Add Doctor
-        </Link>
-
-        <Link
-          href="/hospital/doctors"
-          className="bg-blue-600 px-5 py-3 rounded"
-        >
-          View Doctors
-        </Link>
-      </div>
+      <p>
+        Total Beds:
+        {hospital.totalBeds}
+      </p>
     </div>
   );
 }
