@@ -1,40 +1,71 @@
 'use client';
 
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import api from "@/lib/axios";
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import api from '@/lib/axios';
 
 export default function DoctorPage() {
-  const params = useParams();
-  const hospitalId = params.hospitalId;
+
+  const { hospitalId } = useParams();
 
   const [doctors, setDoctors] = useState([]);
 
   useEffect(() => {
-    if (!hospitalId) return;
 
-    api.get(`/doctors/hospital/${hospitalId}`)
-      .then((res) => {
-        setDoctors(res.data.doctors || []);
-      })
-      .catch(console.error);
+    api
+      .get(`/doctors/hospital/${hospitalId}`)
+      .then((res) =>
+        setDoctors(res.data.doctors)
+      );
 
   }, [hospitalId]);
 
   return (
-    <div className="p-6">
-      <h1>Doctors</h1>
+    <div className="container mx-auto p-6">
 
-      {doctors.length === 0 && (
-        <p>No doctors found</p>
-      )}
+      <h1 className="text-3xl font-bold mb-6">
+        Doctors
+      </h1>
 
-      {doctors.map((doctor) => (
-        <div key={doctor._id} className="border p-3 mb-2">
-          <h2>{doctor.fullName}</h2>
-          <p>{doctor.specialization}</p>
-        </div>
-      ))}
+      <div className="grid md:grid-cols-3 gap-6">
+
+        {doctors.map((doctor) => (
+
+          <div
+            key={doctor._id}
+            className="bg-white rounded-2xl shadow-lg overflow-hidden"
+          >
+            <img
+              src={`${process.env.NEXT_PUBLIC_API_URL}${doctor.photo}`}
+              alt=""
+              className="w-full h-56 object-cover"
+            />
+
+            <div className="p-5">
+
+              <h2 className="text-xl font-bold">
+                {doctor.fullName}
+              </h2>
+
+              <p className="text-blue-600">
+                {doctor.specialization}
+              </p>
+
+              <Link
+                href={`/appointments/book/${doctor._id}`}
+                className="block mt-4 bg-blue-600 text-white text-center py-3 rounded-xl"
+              >
+                Book Appointment
+              </Link>
+
+            </div>
+          </div>
+
+        ))}
+
+      </div>
+
     </div>
   );
 }
