@@ -2,13 +2,15 @@ import express from "express";
 import multer from "multer";
 import {
   createDoctor,
-  getDoctorsByHospital,
+  // getDoctorsByHospital,
+  getMyDoctors,
   getDoctors,
   getDoctorById,
   updateDoctor,
   deleteDoctor,
 } from "../controllers/doctorController.js";
 
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -27,7 +29,9 @@ router.put("/:id", upload.single("photo"), updateDoctor);
 
 router.delete("/:id", deleteDoctor);
 
-router.get("/hospital/:hospitalId", getDoctorsByHospital);
+// router.get("/hospital/:hospitalId", getDoctorsByHospital);
+
+router.get("/my-doctors", authMiddleware , getMyDoctors);
 
 router.get("/", getDoctors);
 

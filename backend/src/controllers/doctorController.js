@@ -499,26 +499,30 @@ export const deleteDoctor = async (req, res) => {
   }
 };
 
-
-export const getDoctorsByHospital = async (req, res) => {
+export const getMyDoctors = async (req, res) => {
   try {
     const db = getDB();
 
-    const { hospitalId } = req.params;
+    const hospitalId = req.user.id;
+
+    console.log("LOGGED HOSPITAL =", hospitalId);
 
     const doctors = await db
       .collection("doctors")
       .find({
-        hospitalId: new ObjectId(hospitalId), // 🔥 FIX
+        hospitalId: new ObjectId(hospitalId),
       })
       .toArray();
+
+    console.log("FOUND DOCTORS COUNT =", doctors.length);
 
     res.json({
       success: true,
       doctors,
     });
-
   } catch (err) {
+    console.error(err);
+
     res.status(500).json({
       success: false,
       message: err.message,

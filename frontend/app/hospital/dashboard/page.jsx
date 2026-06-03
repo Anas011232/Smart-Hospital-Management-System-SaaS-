@@ -32,6 +32,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import DoctorCTASection from "../../../components/doctor/DoctorCTASection";
+import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 function fmt(date) {
@@ -198,11 +200,10 @@ function SubscriptionPanel({ hospital }) {
             <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Status</p>
             <Badge className={sc}>
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  hospital.subscriptionStatus?.toLowerCase() === "active"
+                className={`w-1.5 h-1.5 rounded-full ${hospital.subscriptionStatus?.toLowerCase() === "active"
                     ? "bg-emerald-400"
                     : "bg-red-400"
-                }`}
+                  }`}
               />
               {hospital.subscriptionStatus || "—"}
             </Badge>
@@ -236,6 +237,15 @@ function SubscriptionPanel({ hospital }) {
 export default function Dashboard() {
   const [hospital, setHospital] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+
+    router.push("/login");
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -315,6 +325,23 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={handleLogout}
+                className="
+    flex items-center gap-2
+    px-4 py-2
+    rounded-xl
+    bg-red-500/10
+    border border-red-500/20
+    text-red-400
+    hover:bg-red-500/20
+    hover:border-red-500/40
+    transition-all duration-300
+  "
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
               {hospital.isVerified ? (
                 <Badge className="text-emerald-400 bg-emerald-400/10 border-emerald-500/30">
                   <BadgeCheck size={12} />
@@ -469,18 +496,16 @@ export default function Dashboard() {
             <div
               className={`flex items-start gap-4 p-5 rounded-2xl border backdrop-blur-sm
                 transition-all duration-300 hover:scale-[1.02]
-                ${
-                  hospital.isVerified
-                    ? "bg-emerald-500/[0.06] border-emerald-500/20 hover:border-emerald-500/40"
-                    : "bg-amber-500/[0.06] border-amber-500/20 hover:border-amber-500/40"
+                ${hospital.isVerified
+                  ? "bg-emerald-500/[0.06] border-emerald-500/20 hover:border-emerald-500/40"
+                  : "bg-amber-500/[0.06] border-amber-500/20 hover:border-amber-500/40"
                 }`}
             >
               <div
                 className={`w-10 h-10 rounded-xl flex items-center justify-center border
-                  ${
-                    hospital.isVerified
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                      : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                  ${hospital.isVerified
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                    : "bg-amber-500/10 border-amber-500/20 text-amber-400"
                   }`}
               >
                 {hospital.isVerified ? <CheckCircle2 size={18} /> : <ShieldAlert size={18} />}
@@ -490,9 +515,8 @@ export default function Dashboard() {
                   Verification
                 </p>
                 <p
-                  className={`text-sm font-bold ${
-                    hospital.isVerified ? "text-emerald-400" : "text-amber-400"
-                  }`}
+                  className={`text-sm font-bold ${hospital.isVerified ? "text-emerald-400" : "text-amber-400"
+                    }`}
                 >
                   {hospital.isVerified ? "Verified Hospital" : "Pending Verification"}
                 </p>
@@ -502,18 +526,16 @@ export default function Dashboard() {
             <div
               className={`flex items-start gap-4 p-5 rounded-2xl border backdrop-blur-sm
                 transition-all duration-300 hover:scale-[1.02]
-                ${
-                  !hospital.isBlocked
-                    ? "bg-emerald-500/[0.06] border-emerald-500/20 hover:border-emerald-500/40"
-                    : "bg-red-500/[0.06] border-red-500/20 hover:border-red-500/40"
+                ${!hospital.isBlocked
+                  ? "bg-emerald-500/[0.06] border-emerald-500/20 hover:border-emerald-500/40"
+                  : "bg-red-500/[0.06] border-red-500/20 hover:border-red-500/40"
                 }`}
             >
               <div
                 className={`w-10 h-10 rounded-xl flex items-center justify-center border
-                  ${
-                    !hospital.isBlocked
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                      : "bg-red-500/10 border-red-500/20 text-red-400"
+                  ${!hospital.isBlocked
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                    : "bg-red-500/10 border-red-500/20 text-red-400"
                   }`}
               >
                 {!hospital.isBlocked ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
@@ -523,9 +545,8 @@ export default function Dashboard() {
                   Account Status
                 </p>
                 <p
-                  className={`text-sm font-bold ${
-                    !hospital.isBlocked ? "text-emerald-400" : "text-red-400"
-                  }`}
+                  className={`text-sm font-bold ${!hospital.isBlocked ? "text-emerald-400" : "text-red-400"
+                    }`}
                 >
                   {hospital.isBlocked ? "Blocked" : "Active & In Good Standing"}
                 </p>
