@@ -498,6 +498,37 @@ export const deleteDoctor = async (req, res) => {
     });
   }
 };
+export const getDoctorsByHospital = async (req, res) => {
+  try {
+    const db = getDB();
+
+    const { hospitalId } = req.params;
+
+    if (!ObjectId.isValid(hospitalId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Hospital ID",
+      });
+    }
+
+    const doctors = await db
+      .collection("doctors")
+      .find({
+        hospitalId: new ObjectId(hospitalId),
+      })
+      .toArray();
+
+    res.json({
+      success: true,
+      doctors,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
 
 export const getMyDoctors = async (req, res) => {
   try {
