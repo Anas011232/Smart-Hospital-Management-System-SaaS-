@@ -143,15 +143,27 @@ export const getDoctorAppointments = async (req, res) => {
 };
 
 // appointmentController.js এ এমন একটি ফাংশন রাখুন
+// appointmentController.js
 export const getMyAppointments = async (req, res) => {
   try {
     const db = getDB();
-    // req.user.id টা আপনার Auth Middleware থেকে আসছে
-    const userId = req.user.id; 
-
-    const appointments = await db.collection("appointments")
-      .find({ patientId: new ObjectId(userId) })
-      .toArray();
+    const appointments = await db.collection("appointments").aggregate([
+      { $match: { patientId: new ObjectId(req.user.id) } },
+      { 
+        $lookup: {
+          from: "doctors",
+          localField: "doctorId",
+          foreignField: "_id",
+          as: "doctorDetails"
+        }
+      },
+      { 
+        $unwind: { 
+          path: "$doctorDetails", 
+          preserveNullAndEmptyArrays: true // ডাক্তার না থাকলে যেন এরর না দেয়
+        } 
+      }
+    ]).toArray();
 
     res.json({ success: true, appointments });
   } catch (err) {
