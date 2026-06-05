@@ -141,3 +141,20 @@ export const getDoctorAppointments = async (req, res) => {
     });
   }
 };
+
+// appointmentController.js এ এমন একটি ফাংশন রাখুন
+export const getMyAppointments = async (req, res) => {
+  try {
+    const db = getDB();
+    // req.user.id টা আপনার Auth Middleware থেকে আসছে
+    const userId = req.user.id; 
+
+    const appointments = await db.collection("appointments")
+      .find({ patientId: new ObjectId(userId) })
+      .toArray();
+
+    res.json({ success: true, appointments });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

@@ -203,34 +203,78 @@ export default function AddDoctor() {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const hospitalId = localStorage.getItem("hospitalId");
-      if (!hospitalId) {
-        alert("Hospital ID missing");
-        return;
-      }
-      const data = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
-        data.append(key, value || "");
-      });
-      data.append("hospitalId", hospitalId);
-      if (image) {
-        data.append("photo", image);
-      }
-      await axios.post("http://localhost:5000/api/doctors", data);
-      setSaveSuccess(true);
-      setTimeout(() => router.push("/hospital/doctors"), 1200);
-    } catch (err) {
-      console.log("ERROR:", err.response?.data);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   try {
+  //     const hospitalId = localStorage.getItem("hospitalId");
+  //     if (!hospitalId) {
+  //       alert("Hospital ID missing");
+  //       return;
+  //     }
+  //     const data = new FormData();
+  //     Object.entries(form).forEach(([key, value]) => {
+  //       data.append(key, value || "");
+  //     });
+  //     data.append("hospitalId", hospitalId);
+  //     if (image) {
+  //       data.append("photo", image);
+  //     }
+  //     await axios.post("http://localhost:5000/api/doctors", data);
+  //     setSaveSuccess(true);
+  //     setTimeout(() => router.push("/hospital/doctors"), 1200);
+  //   } catch (err) {
+  //     console.log("ERROR:", err.response?.data);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // ── section navigation ──
+  
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const hospitalId = localStorage.getItem("hospitalId");
+
+    if (!hospitalId) {
+      alert("Hospital ID missing");
+      return;
+    }
+
+    const data = new FormData();
+
+    Object.entries(form).forEach(([key, value]) => {
+      data.append(key, value || "");
+    });
+
+    data.append("hospitalId", hospitalId);
+
+    if (image) {
+      data.append("photo", image);
+    }
+
+    const res = await axios.post(
+      "http://localhost:5000/api/doctors",
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    setSaveSuccess(true);
+    setTimeout(() => router.push("/hospital/doctors"), 1200);
+
+  } catch (err) {
+    console.log("ERROR:", err.response?.data || err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   const sectionIds = SECTIONS.map((s) => s.id);
   const activeIdx = sectionIds.indexOf(activeSection);
 

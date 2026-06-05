@@ -226,9 +226,11 @@ export const createDoctor = async (req, res) => {
 
       fullName: safeString(req.body.fullName),
 
-      photo: req.file
-        ? `/uploads/${req.file.filename}`
-        : "",
+      // photo: req.file
+      //   ? `/uploads/${req.file.filename}`
+      //   : "",
+
+      photo: req.file ? `/uploads/${req.file.filename}` : "",
 
       email: safeString(req.body.email),
       password: safeString(req.body.password),

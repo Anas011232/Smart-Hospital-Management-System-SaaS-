@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  FaHome,
-  FaHospital,
-  FaUserMd,
-  FaCalendar,
-  FaFileMedical,
-  FaSignOutAlt
-} from "react-icons/fa";
+import { FaHome, FaHospital, FaCalendar, FaFileMedical, FaUser, FaSignOutAlt } from "react-icons/fa";
 
 export default function PatientLayout({ children }) {
   const router = useRouter();
@@ -20,51 +13,62 @@ export default function PatientLayout({ children }) {
     router.push("/login");
   };
 
-  const active = (path) =>
-    pathname === path
-      ? "bg-blue-100 text-blue-600 font-semibold"
-      : "hover:bg-gray-100";
+  // Active state logic: যদি পাথের সাথে মিলে যায়
+  const isActive = (path) => {
+    if (path === "/hospitals") return pathname.includes("/hospitals") || pathname.includes("/doctors");
+    return pathname === path;
+  };
+
+  const navItems = [
+    { href: "/patient-dashboard", label: "Dashboard", icon: FaHome },
+    { href: "/hospitals", label: "Hospitals", icon: FaHospital },
+    { href: "/patient/appointments", label: "Appointments", icon: FaCalendar },
+    { href: "/patient/medical-history", label: "Medical History", icon: FaFileMedical },
+    { href: "/patient/profile", label: "Profile", icon: FaUser },
+  ];
 
   return (
     <div className="flex min-h-screen bg-gray-100">
+      <aside className="w-72 bg-white shadow-xl p-6 flex flex-col">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-blue-600">🏥 MedQueue+</h1>
+          <p className="text-xs text-gray-500 mt-1">Patient Panel</p>
+        </div>
 
-      {/* SIDEBAR */}
-      <aside className="w-72 bg-white shadow-xl p-6">
+        <nav className="flex-1 space-y-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
 
-        <h1 className="text-2xl font-bold text-blue-600 mb-8">
-          🏥 MedQueue+
-        </h1>
-
-        <nav className="space-y-2">
-
-          <Link href="/patient-dashboard"
-            className={`flex items-center gap-3 p-3 rounded-xl ${active("/patient/patient-dashboard")}`}>
-            <FaHome /> Dashboard
-          </Link>
-
-          <Link href="/patient/hospitals"
-            className={`flex items-center gap-3 p-3 rounded-xl ${active("/patient/hospitals")}`}>
-            <FaHospital /> Hospitals
-          </Link>
-
-          <Link href="/patient/medical-history"
-            className={`flex items-center gap-3 p-3 rounded-xl ${active("/patient/medical-history")}`}>
-            <FaFileMedical /> History
-          </Link>
-
-          <button
-            onClick={logout}
-            className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-50 w-full mt-6"
-          >
-            <FaSignOutAlt /> Logout
-          </button>
-
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200
+                  ${active 
+                    ? "bg-blue-600 text-white shadow-md" 
+                    : "text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
+                <Icon />
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
+
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-50 mt-6 transition"
+        >
+          <FaSignOutAlt />
+          Logout
+        </button>
       </aside>
 
-      {/* MAIN */}
-      <main className="flex-1 p-8">{children}</main>
-
+      <main className="flex-1 p-8 overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
