@@ -9,47 +9,78 @@ export default function PatientDashboard() {
 
   useEffect(() => {
     api.get("/hospital").then((res) => {
-      setHospitals(res.data.hospitals);
+      setHospitals(res.data.hospitals || []);
     });
   }, []);
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gray-50 p-6 md:p-10">
+      
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">
+          🏥 Available Hospitals
+        </h1>
+        <p className="text-gray-500 mt-1">
+          Find doctors and hospital details easily
+        </p>
+      </div>
 
-      {/* HEADER */}
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        🏥 Hospitals
-      </h1>
-
-      {/* LIST */}
-      <div className="space-y-4">
-
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
         {hospitals.map((h) => (
           <div
             key={h._id}
-            className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition"
+            className="bg-white rounded-2xl shadow-md hover:shadow-xl transition p-5 border border-gray-100"
           >
+            
+            {/* Top Section */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {h.hospitalName}
+                </h2>
 
-            {/* NAME */}
-            <h2 className="text-xl font-semibold text-gray-800">
-              {h.hospitalName}
-            </h2>
+                <p className="text-sm text-gray-500">
+                  {h.city}, {h.country}
+                </p>
+              </div>
 
-            {/* INFO */}
-            <p className="text-sm text-gray-500 mt-1">
-              📍 {h.city}, {h.country} • 🏥 {h.hospitalType}
+              {/* Status badge */}
+              <span
+                className={`text-xs px-3 py-1 rounded-full font-medium ${
+                  h.subscriptionStatus === "active"
+                    ? "bg-green-100 text-green-600"
+                    : "bg-red-100 text-red-600"
+                }`}
+              >
+                {h.subscriptionStatus}
+              </span>
+            </div>
+
+            {/* Info */}
+            <div className="mt-4 space-y-2 text-sm text-gray-600">
+              <p>🏷️ Type: {h.hospitalType}</p>
+              <p>👨‍⚕️ Doctors: {h.totalDoctors}</p>
+              <p>🛏️ Beds: {h.totalBeds}</p>
+              <p>📅 Established: {h.establishedYear}</p>
+            </div>
+
+            {/* Address */}
+            <p className="mt-3 text-sm text-gray-500">
+              📍 {h.address}
             </p>
 
-            {/* BUTTON */}
-            <div className="mt-4">
+            {/* Action */}
+            <div className="mt-5">
               <Link
                 href={`/doctors/${h._id}`}
-                className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                className="block text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition"
               >
                 View Doctors →
               </Link>
             </div>
-
           </div>
         ))}
 

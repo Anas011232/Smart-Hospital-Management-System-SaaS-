@@ -1,12 +1,12 @@
 'use client';
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   FaHome,
-  FaUser,
   FaHospital,
-  FaCalendarAlt,
+  FaUserMd,
+  FaCalendar,
   FaFileMedical,
   FaSignOutAlt
 } from "react-icons/fa";
@@ -15,54 +15,46 @@ export default function PatientLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = () => {
+  const logout = () => {
     localStorage.removeItem("token");
     router.push("/login");
   };
 
-  const isActive = (path) => pathname === path;
-
-  const linkClass = (path) =>
-    `flex items-center gap-3 p-3 rounded-lg transition ${
-      isActive(path)
-        ? "bg-blue-100 text-blue-600 font-semibold"
-        : "hover:bg-blue-50 hover:text-blue-600"
-    }`;
+  const active = (path) =>
+    pathname === path
+      ? "bg-blue-100 text-blue-600 font-semibold"
+      : "hover:bg-gray-100";
 
   return (
     <div className="flex min-h-screen bg-gray-100">
 
       {/* SIDEBAR */}
       <aside className="w-72 bg-white shadow-xl p-6">
-        <h1 className="text-2xl font-bold mb-8 text-blue-600">
+
+        <h1 className="text-2xl font-bold text-blue-600 mb-8">
           🏥 MedQueue+
         </h1>
 
-        <nav className="space-y-3 text-gray-700">
+        <nav className="space-y-2">
 
-          <Link href="/patient/dashboard" className={linkClass("/patient/dashboard")}>
+          <Link href="/patient-dashboard"
+            className={`flex items-center gap-3 p-3 rounded-xl ${active("/patient/patient-dashboard")}`}>
             <FaHome /> Dashboard
           </Link>
 
-          <Link href="/patient/profile" className={linkClass("/patient/profile")}>
-            <FaUser /> My Profile
-          </Link>
-
-          <Link href="/patient/hospitals" className={linkClass("/patient/hospitals")}>
+          <Link href="/patient/hospitals"
+            className={`flex items-center gap-3 p-3 rounded-xl ${active("/patient/hospitals")}`}>
             <FaHospital /> Hospitals
           </Link>
 
-          <Link href="/patient/appointments" className={linkClass("/patient/appointments")}>
-            <FaCalendarAlt /> Appointments
-          </Link>
-
-          <Link href="/patient/medical-records" className={linkClass("/patient/medical-records")}>
-            <FaFileMedical /> Medical Records
+          <Link href="/patient/medical-history"
+            className={`flex items-center gap-3 p-3 rounded-xl ${active("/patient/medical-history")}`}>
+            <FaFileMedical /> History
           </Link>
 
           <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 p-3 rounded-lg text-red-500 hover:bg-red-50 w-full mt-6"
+            onClick={logout}
+            className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-50 w-full mt-6"
           >
             <FaSignOutAlt /> Logout
           </button>
@@ -71,9 +63,7 @@ export default function PatientLayout({ children }) {
       </aside>
 
       {/* MAIN */}
-      <main className="flex-1 p-8">
-        {children}
-      </main>
+      <main className="flex-1 p-8">{children}</main>
 
     </div>
   );
