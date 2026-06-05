@@ -24,7 +24,7 @@ export default function PatientLayout({ children }) {
     { href: "/hospitals", label: "Hospitals", icon: FaHospital },
     { href: "/patient/appointments", label: "Appointments", icon: FaCalendar },
     { href: "/patient/medical-history", label: "Medical History", icon: FaFileMedical },
-    { href: "/patient/profile", label: "Profile", icon: FaUser },
+    { href: "/profile", label: "Profile", icon: FaUser },
   ];
 
   return (

@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import bcrypt from "bcryptjs";
 import { getDB } from "../config/db.js";
 
@@ -74,5 +75,27 @@ export const registerPatient = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getMyProfile = async (req, res) => {
+  try {
+    const db = getDB();
+    const userId = req.user?.id;
+
+    // MongoDB এর ObjectId ফরম্যাটে আইডি কনভার্ট করা
+    const patient = await db.collection("patients").findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { password: 0 } }
+    );
+
+    if (!patient) {
+      return res.status(404).json({ success: false, message: "Patient not found" });
+    }
+
+    res.json({ success: true, patient });
+  } catch (err) {
+    console.error("DEBUG ERROR:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
