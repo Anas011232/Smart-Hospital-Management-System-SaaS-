@@ -7,55 +7,57 @@ export default function DoctorSidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { name: "Dashboard", path: "/doctor-dashboard", icon: <LayoutDashboard size={20} /> },
-    { name: "Today's Sessions", path: "/doctor-dashboard/sessions", icon: <Clock3 size={20} /> },
-    { name: "Live Queue", path: "/doctor-dashboard/live-queue", icon: <Users size={20} /> },
-    { name: "My Prescriptions", path: "/doctor-dashboard/prescriptions", icon: <FileText size={20} /> },
-    { name: "Profile", path: "/doctor-dashboard/profile", icon: <UserCircle size={20} /> },
+    { name: "Dashboard", path: "/doctor-dashboard", icon: <LayoutDashboard size={22} /> },
+    { name: "Today's Sessions", path: "/doctor-dashboard/sessions", icon: <Clock3 size={22} /> },
+    { name: "Live Queue", path: "/doctor-dashboard/live-queue", icon: <Users size={22} /> },
+    { name: "Prescriptions", path: "/doctor-dashboard/prescriptions", icon: <FileText size={22} /> },
+    { name: "Profile", path: "/doctor-dashboard/profile", icon: <UserCircle size={22} /> },
   ];
 
   return (
-    <div className="w-64 bg-white border-r min-h-screen p-4 flex flex-col shadow-sm">
-      {/* লোগো সেকশন */}
-      <div className="mb-8 px-4">
-        <h2 className="text-xl font-bold text-indigo-700">HospitalPortal</h2>
-        <p className="text-xs text-gray-400">Doctor Panel</p>
+    <aside className="w-72 bg-white border-r border-gray-200 min-h-screen flex flex-col shadow-sm">
+      {/* Logo Section */}
+      <div className="p-8">
+        <h2 className="text-2xl font-extrabold text-indigo-700 tracking-tight">HospitalPortal</h2>
+        <p className="text-sm text-gray-500 font-medium mt-1">Doctor Management Panel</p>
       </div>
 
-      {/* মেনু আইটেম */}
-      <nav className="flex-1 space-y-2">
+      {/* Navigation Links */}
+      <nav className="flex-1 px-4 space-y-1">
         {menuItems.map((item) => {
-          const isActive = pathname === item.path;
+          const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
           return (
             <Link 
               key={item.name} 
               href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+              className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 font-medium ${
                 isActive 
-                  ? "bg-indigo-600 text-white shadow-md" 
-                  : "text-gray-600 hover:bg-gray-100 hover:text-indigo-600"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" 
+                  : "text-gray-600 hover:bg-indigo-50 hover:text-indigo-700"
               }`}
             >
-              {item.icon}
-              <span className="font-medium">{item.name}</span>
+              <span className={isActive ? "text-white" : "text-gray-400 group-hover:text-indigo-600"}>
+                {item.icon}
+              </span>
+              <span>{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* লগআউট বাটন */}
-      <div className="mt-auto pt-4 border-t">
+      {/* Logout Button */}
+      <div className="p-6 border-t border-gray-100">
         <button 
           onClick={() => {
             localStorage.removeItem("token");
             window.location.href = "/login";
           }}
-          className="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-all w-full"
+          className="flex items-center gap-4 px-5 py-3.5 text-red-500 hover:bg-red-50 rounded-2xl transition-all duration-300 w-full font-medium"
         >
-          <LogOut size={20} />
-          <span className="font-medium">Logout</span>
+          <LogOut size={22} />
+          <span>Logout</span>
         </button>
       </div>
-    </div>
+    </aside>
   );
 }

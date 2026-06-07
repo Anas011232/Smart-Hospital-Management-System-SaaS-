@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaHome, FaHospital, FaCalendar, FaFileMedical, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { 
+  FaHome, 
+  FaHospital, 
+  FaCalendar, 
+  FaFileMedical, 
+  FaUser, 
+  FaSignOutAlt, 
+  FaClock, 
+  FaClipboardList 
+} from "react-icons/fa";
 
 export default function PatientLayout({ children }) {
   const router = useRouter();
@@ -13,9 +22,11 @@ export default function PatientLayout({ children }) {
     router.push("/login");
   };
 
-  // Active state logic: যদি পাথের সাথে মিলে যায়
+  // Active state logic
   const isActive = (path) => {
     if (path === "/hospitals") return pathname.includes("/hospitals") || pathname.includes("/doctors");
+    if (path === "/patient-dashboard/live-queue-patient") return pathname.includes("live-queue-patient");
+    if (path === "/patient-dashboard/my-prescriptions") return pathname.includes("my-prescriptions");
     return pathname === path;
   };
 
@@ -24,6 +35,9 @@ export default function PatientLayout({ children }) {
     { href: "/hospitals", label: "Hospitals", icon: FaHospital },
     { href: "/patient/appointments", label: "Appointments", icon: FaCalendar },
     { href: "/patient/medical-history", label: "Medical History", icon: FaFileMedical },
+    // FaUserClock এবং FaNotesMedical এর পরিবর্তে FaClock ও FaClipboardList ব্যবহার করা হয়েছে
+    { href: "/patient-dashboard/live-queue-patient", label: "Live Queue", icon: FaClock },
+    { href: "/patient-dashboard/my-prescriptions", label: "My Prescriptions", icon: FaClipboardList },
     { href: "/profile", label: "Profile", icon: FaUser },
   ];
 

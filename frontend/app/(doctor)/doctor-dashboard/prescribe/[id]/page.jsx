@@ -15,11 +15,17 @@ export default function PrescribePage({ params: paramsPromise }) {
   const [tests, setTests] = useState([""]);
   const [advice, setAdvice] = useState("");
 
-  useEffect(() => {
-    api.get(`/${appointmentId}`).then((res) => {
-      // আপনি আপনার গেট সিঙ্গেল অ্যাপয়েন্টমেন্ট এন্ডপয়েন্ট ব্যবহার করবেন
-      setAppointment(res.data); 
-    });
+ useEffect(() => {
+    if (!appointmentId) return;
+
+    // পাথটি লক্ষ্য করুন: 'appointments' শব্দটি যুক্ত করা হয়েছে
+    api.get(`/appointments/${appointmentId}`)
+      .then((res) => {
+        setAppointment(res.data);
+      })
+      .catch((err) => {
+        console.error("API Error:", err);
+      });
   }, [appointmentId]);
 
   const addMedicine = () => setMedicines([...medicines, { name: "", dosage: "1+0+1", duration: "7 Days", instruction: "After Meal" }]);

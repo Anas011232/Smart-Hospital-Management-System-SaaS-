@@ -6,6 +6,10 @@ import {
   rejectAppointment,
   getDoctorAppointments,
   getMyAppointments,
+  
+  getAppointmentById,
+  // getAcceptedAppointments,
+  
 } from "../controllers/appointmentController.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -34,5 +38,8 @@ router.patch(
 );
 
 router.get("/my-appointments", authMiddleware, getMyAppointments);
+
+// router.get("/doctor/accepted", authMiddleware, getAcceptedAppointments);
+router.get("/:id", authMiddleware, getAppointmentById);
 
 export default router;

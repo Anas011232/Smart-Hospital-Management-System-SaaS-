@@ -170,3 +170,22 @@ export const getMyAppointments = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+// নতুন এই ফাংশনটি যোগ করুন
+export const getAppointmentById = async (req, res) => {
+  try {
+    const db = getDB();
+    const appointment = await db.collection("appointments").findOne({ 
+      _id: new ObjectId(req.params.id) 
+    });
+    
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+    
+    res.json(appointment);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
