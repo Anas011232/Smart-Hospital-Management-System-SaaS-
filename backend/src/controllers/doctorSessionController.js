@@ -128,3 +128,24 @@ export const getActiveSession = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// doctorSessionController.js
+export const endOPDSession = async (req, res) => {
+  try {
+    const db = getDB();
+    const { sessionId } = req.body;
+    
+    // সেশনটি ডিলিট করা
+    await db.collection("sessions").deleteOne({ _id: new ObjectId(sessionId) });
+    
+    // ঐ সেশনের সাথে যুক্ত থাকা সকল অ্যাপয়েন্টমেন্টের স্ট্যাটাস আপডেট করা (ঐচ্ছিক)
+    await db.collection("appointments").updateMany(
+      { sessionId: new ObjectId(sessionId) },
+      { $set: { status: "completed" } }
+    );
+
+    res.json({ success: true, message: "OPD Session ended successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
