@@ -562,3 +562,21 @@ export const getMyDoctors = async (req, res) => {
     });
   }
 };
+
+export const getMyProfile = async (req, res) => {
+  try {
+    const db = getDB();
+    // authMiddleware থেকে আসা ইউজারের আইডি
+    const doctorId = req.user.id; 
+
+    const doctor = await db.collection("doctors").findOne({
+      _id: new ObjectId(doctorId),
+    });
+
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    res.json({ success: true, doctor });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

@@ -10,7 +10,6 @@ export default function DoctorSidebar() {
     { name: "Dashboard", path: "/doctor-dashboard", icon: <LayoutDashboard size={22} /> },
     { name: "Today's Sessions", path: "/doctor-dashboard/sessions", icon: <Clock3 size={22} /> },
     { name: "Live Queue", path: "/doctor-dashboard/live-queue", icon: <Users size={22} /> },
-    { name: "Prescriptions", path: "/doctor-dashboard/prescriptions", icon: <FileText size={22} /> },
     { name: "Profile", path: "/doctor-dashboard/profile", icon: <UserCircle size={22} /> },
   ];
 
