@@ -85,6 +85,42 @@ export const nextPatient = async (req, res) => {
   }
 };
 
+
+// controllers/doctorSessionController.js
+// export const nextPatient = async (req, res) => {
+//   try {
+//     const db = getDB();
+//     const doctorId = req.user.id;
+//     const { sessionId } = req.body;
+
+//     const session = await db.collection("doctor_sessions").findOne({ _id: new ObjectId(sessionId) });
+    
+//     // ঐ দিনের সব 'accepted' রোগী খুঁজে বের করা
+//     const patients = await db.collection("appointments").find({
+//       doctorId: new ObjectId(doctorId),
+//       "patientInfo.appointmentDate": session.appointmentDate,
+//       status: "accepted"
+//     }).sort({ serialNumber: 1 }).toArray();
+
+//     const nextSerial = session.currentSerial + 1;
+
+//     // যদি আর রোগী না থাকে, সেশন ক্লোজ করুন
+//     if (nextSerial > patients.length) {
+//       await db.collection("doctor_sessions").updateOne({ _id: new ObjectId(sessionId) }, { $set: { status: "completed" } });
+//       return res.json({ success: true, finished: true });
+//     }
+
+//     await db.collection("doctor_sessions").updateOne({ _id: new ObjectId(sessionId) }, { $set: { currentSerial: nextSerial } });
+//     emitQueueUpdate(`room_${doctorId}`, { currentSerial: nextSerial, isBreak: false });
+    
+//     res.json({ success: true, currentSerial: nextSerial });
+//   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+// };
+
+
+
+
+
 // ৩. ব্রেক নেওয়া বা ব্রেক শেষ করা
 export const toggleBreak = async (req, res) => {
   try {
@@ -124,27 +160,6 @@ export const getActiveSession = async (req, res) => {
     });
 
     res.json({ success: true, session });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-// doctorSessionController.js
-export const endOPDSession = async (req, res) => {
-  try {
-    const db = getDB();
-    const { sessionId } = req.body;
-    
-    // সেশনটি ডিলিট করা
-    await db.collection("sessions").deleteOne({ _id: new ObjectId(sessionId) });
-    
-    // ঐ সেশনের সাথে যুক্ত থাকা সকল অ্যাপয়েন্টমেন্টের স্ট্যাটাস আপডেট করা (ঐচ্ছিক)
-    await db.collection("appointments").updateMany(
-      { sessionId: new ObjectId(sessionId) },
-      { $set: { status: "completed" } }
-    );
-
-    res.json({ success: true, message: "OPD Session ended successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

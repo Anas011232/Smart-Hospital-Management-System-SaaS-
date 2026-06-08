@@ -48,6 +48,47 @@ export const createAppointment = async (req, res) => {
   }
 };
 
+
+// export const createAppointment = async (req, res) => {
+//   try {
+//     const db = getDB();
+//     const { doctorId, patientInfo } = req.body;
+//     const date = patientInfo.appointmentDate;
+
+//     // ১. শুধুমাত্র ওই নির্দিষ্ট ডাক্তারের ওই নির্দিষ্ট দিনের সব অ্যাপয়েন্টমেন্ট খুঁজুন
+//     const lastAppointment = await db.collection("appointments")
+//       .find({
+//         doctorId: new ObjectId(doctorId),
+//         "patientInfo.appointmentDate": date
+//       })
+//       .sort({ serialNumber: -1 }) // সবচেয়ে বড় সিরিয়ালটি আগে আনুন
+//       .limit(1)
+//       .toArray();
+
+//     // ২. যদি ওই দিনে কোনো অ্যাপয়েন্টমেন্ট না থাকে, তবে সিরিয়াল ১, নাহলে আগের সিরিয়ালের সাথে +১
+//     const serialNumber = lastAppointment.length > 0 ? lastAppointment[0].serialNumber + 1 : 1;
+
+//     const appointment = {
+//       patientId: new ObjectId(req.user.id),
+//       doctorId: new ObjectId(doctorId),
+//       patientInfo,
+//       serialNumber, // ডাইনামিক সিরিয়াল
+//       status: "pending",
+//       createdAt: new Date(),
+//       updatedAt: new Date(),
+//     };
+
+//     await db.collection("appointments").insertOne(appointment);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Appointment request sent",
+//       serialNumber 
+//     });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
 export const acceptAppointment = async (
   req,
   res
@@ -185,6 +226,31 @@ export const getAppointmentById = async (req, res) => {
     }
     
     res.json(appointment);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const finishSession = async (req, res) => {
+  try {
+    const db = getDB();
+    const doctorId = req.user.id;
+    const { appointmentDate } = req.body;
+
+    // ১. চেক করুন আজও কি কোনো রোগী 'accepted' অবস্থায় আছে?
+    const remaining = await db.collection("appointments").countDocuments({
+      doctorId: new ObjectId(doctorId),
+      "patientInfo.appointmentDate": appointmentDate,
+      status: "accepted"
+    });
+
+    if (remaining === 0) {
+      // ২. সব রোগী শেষ, তাই আজ আর কোনো নতুন রোগী নেওয়া যাবে না
+      // চাইলে এখানে সেশন স্ট্যাটাস আপডেট করতে পারেন
+      return res.json({ success: true, finished: true, message: "All patients seen!" });
+    }
+
+    return res.json({ success: true, finished: false, remaining });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -4,26 +4,28 @@ import api from "@/lib/axios";
 import { io } from "socket.io-client";
 
 export default function PatientLiveQueue() {
-  const [doctorId, setDoctorId] = useState(""); // আপনার লজিক অনুযায়ী ডক্টর আইডি সেট করবেন
   const [session, setSession] = useState(null);
   const [mySerialNumber, setMySerialNumber] = useState(null);
 
   useEffect(() => {
-    // উদাহরণস্বরূপ পেশেন্টের লেটেস্ট অ্যাপয়েন্টমেন্ট থেকে ডাক্তার এবং সিরিয়াল নম্বর বের করা
+    // ১. পেশেন্টের লেটেস্ট অ্যাপয়েন্টমেন্ট ডাটা আনা
     api.get("/appointments/my-appointments").then((res) => {
-      const latest = res.data.appointments[0]; // আপনার প্রয়োজনমত অ্যাপয়েন্টমেন্ট অবজেক্ট নিন
+      const latest = res.data.appointments[0]; 
       if (latest) {
-        setDoctorId(latest.doctorId);
         setMySerialNumber(latest.serialNumber);
 
-        // একটিভ সেশন ডাটা আনা
-        api.get(`/session/active/${latest.doctorId}`).then((sessionRes) => {
+        // ২. ওই অ্যাপয়েন্টমেন্টের তারিখ অনুযায়ী একটিভ সেশন খুঁজে বের করা
+        const date = latest.patientInfo.appointmentDate;
+        
+        // আপনার ব্যাকএন্ডে সেশন খোঁজার সময় তারিখটাও পাঠানো উচিত (getActiveSession আপডেট করে নেবেন)
+        api.get(`/session/active/${latest.doctorId}?date=${date}`).then((sessionRes) => {
           setSession(sessionRes.data.session);
         });
 
-        // Socket.io লাইভ লিসেনার সেট করা
+        // ৩. Socket.io লাইভ লিসেনার - রুম আইডি এখন তারিখসহ
         const socket = io("http://localhost:5000");
-        socket.emit("join-room", `room_${latest.doctorId}`);
+        const room = `room_${latest.doctorId}_${date}`;
+        socket.emit("join-room", room);
 
         socket.on("queue-update", (data) => {
           setSession((prev) => ({
@@ -58,17 +60,18 @@ export default function PatientLiveQueue() {
             </div>
           </div>
 
+          {/* কন্ডিশনাল ইউআই আপডেট */}
           {session.isBreak ? (
             <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-center font-medium">
               🚨 Doctor is currently on break: <span className="font-bold">{session.breakReason}</span>
             </div>
           ) : remainingPatients > 0 ? (
             <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-xl text-center font-medium">
-              🟢 {remainingPatients} Patients left before you. Please stay nearby.
+              🟢 {remainingPatients} Patients left before you.
             </div>
           ) : remainingPatients === 0 ? (
             <div className="bg-blue-600 text-white p-4 rounded-xl text-center font-bold animate-pulse">
-              👉 It's YOUR turn! Please enter the doctor's room.
+              👉 It's YOUR turn!
             </div>
           ) : (
             <div className="bg-gray-100 text-gray-500 p-4 rounded-xl text-center font-medium">
@@ -78,7 +81,7 @@ export default function PatientLiveQueue() {
         </div>
       ) : (
         <p className="text-gray-500 text-center bg-gray-50 p-6 rounded-xl border">
-          No active session going on for this doctor right now.
+          No active session going on right now.
         </p>
       )}
     </div>

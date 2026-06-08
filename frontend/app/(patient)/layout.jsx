@@ -33,7 +33,7 @@ export default function PatientLayout({ children }) {
   const navItems = [
     { href: "/patient-dashboard", label: "Dashboard", icon: FaHome },
     { href: "/hospitals", label: "Hospitals", icon: FaHospital },
-    { href: "/patient/appointments", label: "Appointments", icon: FaCalendar },
+    
     { href: "/patient/medical-history", label: "Medical History", icon: FaFileMedical },
     // FaUserClock এবং FaNotesMedical এর পরিবর্তে FaClock ও FaClipboardList ব্যবহার করা হয়েছে
     { href: "/patient-dashboard/live-queue-patient", label: "Live Queue", icon: FaClock },
