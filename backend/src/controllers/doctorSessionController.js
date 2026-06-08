@@ -1,7 +1,7 @@
 // src/controllers/doctorSessionController.js
 import { ObjectId } from "mongodb";
 import { getDB } from "../config/db.js";
-import { emitQueueUpdate } from "../socket/queue.socket.js";
+import { emitQueueUpdate, getIO, emitSessionEnded } from "../socket/queue.socket.js";
 
 // ১. সেশন শুরু করা
 export const startSession = async (req, res) => {
@@ -49,8 +49,8 @@ export const startSession = async (req, res) => {
     const result = await db.collection("doctor_sessions").insertOne(newSession);
     newSession._id = result.insertedId;
 
-    // সকেট লাইভ আপডেট
-    emitQueueUpdate(`room_${doctorId}`, { currentSerial: 1, isBreak: false, breakReason: "" });
+    // সকেট লাইভ আপডেট (DATE-BASED ROOM)
+    emitQueueUpdate(`room_${doctorId}_${appointmentDate}`, { currentSerial: 1, isBreak: false, breakReason: "" });
 
     res.status(201).json({ success: true, message: "Session started successfully", session: newSession });
   } catch (err) {
@@ -70,14 +70,16 @@ export const nextPatient = async (req, res) => {
 
     const nextSerial = session.currentSerial + 1;
 
-    // সেশন আপডেট
     await db.collection("doctor_sessions").updateOne(
       { _id: new ObjectId(sessionId) },
       { $set: { currentSerial: nextSerial, isBreak: false, breakReason: "" } }
     );
 
-    // সকেট লাইভ আপডেট পাঠানো
-    emitQueueUpdate(`room_${doctorId}`, { currentSerial: nextSerial, isBreak: false, breakReason: "" });
+    // EMIT WITH DATE-BASED ROOM
+    emitQueueUpdate(`room_${doctorId}_${session.appointmentDate}`, { currentSerial: nextSerial, isBreak: false, breakReason: "" });
+
+    // Check auto-end after advancing
+    await checkSessionAutoEnd(sessionId, session.appointmentDate, doctorId);
 
     res.json({ success: true, message: "Moved to next patient", currentSerial: nextSerial });
   } catch (err) {
@@ -135,8 +137,8 @@ export const toggleBreak = async (req, res) => {
 
     const session = await db.collection("doctor_sessions").findOne({ _id: new ObjectId(sessionId) });
 
-    // লাইভ সকেট এমিট
-    emitQueueUpdate(`room_${doctorId}`, {
+    // EMIT WITH DATE-BASED ROOM
+    emitQueueUpdate(`room_${doctorId}_${session.appointmentDate}`, {
       currentSerial: session.currentSerial,
       isBreak,
       breakReason: breakReason || "",
@@ -153,14 +155,124 @@ export const getActiveSession = async (req, res) => {
   try {
     const db = getDB();
     const doctorId = req.params.doctorId;
+    const date = req.query.date; // DATE FILTER FROM QUERY
     
-    const session = await db.collection("doctor_sessions").findOne({
+    // Build query filter
+    const query = {
       doctorId: new ObjectId(doctorId),
       status: "active"
-    });
+    };
+
+    // If date provided, filter by date
+    if (date) {
+      query.appointmentDate = date;
+    }
+
+    const session = await db.collection("doctor_sessions").findOne(query);
 
     res.json({ success: true, session });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// FINISH SESSION
+export const finishSession = async (req, res) => {
+  try {
+    const db = getDB();
+    const doctorId = req.user.id;
+    const { sessionId, appointmentDate } = req.body;
+
+    const session = await db.collection("doctor_sessions").findOne({
+      _id: new ObjectId(sessionId),
+      doctorId: new ObjectId(doctorId),
+    });
+
+    if (!session) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Session not found" });
+    }
+
+    const waitingOrInProgress = await db.collection("appointments").countDocuments({
+      doctorId: new ObjectId(doctorId),
+      "patientInfo.appointmentDate": appointmentDate,
+      status: "accepted",
+      consultationStatus: { $in: ["waiting", "in_consultation"] },
+    });
+
+    if (waitingOrInProgress > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot end session. Still have waiting or in-progress patients.",
+        remainingCount: waitingOrInProgress,
+      });
+    }
+
+    await db.collection("doctor_sessions").updateOne(
+      { _id: new ObjectId(sessionId) },
+      {
+        $set: {
+          status: "completed",
+          endedAt: new Date(),
+        },
+      }
+    );
+
+    emitSessionEnded(`room_${doctorId}`, {
+      sessionId,
+      status: "completed",
+      timestamp: new Date(),
+    });
+
+    res.json({
+      success: true,
+      message: "Session finished successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// AUTO-CHECK FOR SESSION END
+export const checkSessionAutoEnd = async (sessionId, appointmentDate, doctorId) => {
+  try {
+    const db = getDB();
+
+    const remaining = await db.collection("appointments").countDocuments({
+      doctorId: new ObjectId(doctorId),
+      "patientInfo.appointmentDate": appointmentDate,
+      status: "accepted",
+      consultationStatus: { $in: ["waiting", "in_consultation"] },
+    });
+
+    if (remaining === 0) {
+      await db.collection("doctor_sessions").updateOne(
+        { _id: new ObjectId(sessionId) },
+        {
+          $set: {
+            status: "completed",
+            endedAt: new Date(),
+          },
+        }
+      );
+
+      emitSessionEnded(`room_${doctorId}`, {
+        sessionId,
+        status: "completed",
+        automatic: true,
+        timestamp: new Date(),
+      });
+
+      return true;
+    }
+
+    return false;
+  } catch (err) {
+    console.error("Error in checkSessionAutoEnd:", err.message);
+    return false;
   }
 };

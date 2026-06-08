@@ -15,9 +15,23 @@ export const initSocket = (server) => {
 
     socket.on("join-room", (roomId) => {
       socket.join(roomId);
+      console.log(`Socket ${socket.id} joined room: ${roomId}`);
+    });
+
+    socket.on("leave-room", (roomId) => {
+      socket.leave(roomId);
+      console.log(`Socket ${socket.id} left room: ${roomId}`);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("⚡ User disconnected:", socket.id);
     });
   });
 
+  return io;
+};
+
+export const getIO = () => {
   return io;
 };
 
@@ -26,5 +40,17 @@ export const emitQueueUpdate = (roomId, data) => {
     io.to(roomId).emit("queue-update", data);
   } else {
     console.warn("Socket.io is not initialized yet!");
+  }
+};
+
+export const emitQueueStats = (roomId, data) => {
+  if (io) {
+    io.to(roomId).emit("queue-stats", data);
+  }
+};
+
+export const emitSessionEnded = (roomId, data) => {
+  if (io) {
+    io.to(roomId).emit("session-ended", data);
   }
 };

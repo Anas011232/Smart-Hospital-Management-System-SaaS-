@@ -74,7 +74,13 @@ const server = http.createServer(app); // সকেট সার্ভার ত
 // সকেট ইনিশিয়েট করুন
 initSocket(server);
 
-app.use(cors());
+// server.js এ এটি আপডেট করুন
+app.use(cors({
+  origin: "http://localhost:3000", // আপনার ফ্রন্টএন্ডের ইউআরএল
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"] // এই লাইনটি না থাকলে টোকেন হেডার ড্রপ হয়ে যায়
+}));
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
@@ -89,6 +95,7 @@ app.use("/api/appointments", appointmentRoutes);
 // নতুন সেশন এবং প্রেসক্রিপশন রাউটস এখানে ব্যবহার করুন
 app.use("/api/session", doctorSessionRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
