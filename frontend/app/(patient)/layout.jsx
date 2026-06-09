@@ -27,7 +27,6 @@ export default function PatientLayout({ children }) {
   const navItems = [
     { href: "/patient-dashboard", label: "Dashboard", icon: FaHome },
     { href: "/hospitals", label: "Hospitals", icon: FaHospital },
-    { href: "/patient/medical-history", label: "Medical History", icon: FaFileMedical },
     { href: "/patient-dashboard/live-queue-patient", label: "Live Queue", icon: FaClock },
     { href: "/patient-dashboard/my-prescriptions", label: "My Prescriptions", icon: FaClipboardList },
     { href: "/profile", label: "Profile", icon: FaUser },

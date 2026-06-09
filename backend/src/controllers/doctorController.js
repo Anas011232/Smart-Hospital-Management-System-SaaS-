@@ -580,3 +580,165 @@ export const getMyProfile = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+
+// ৩. প্রোফাইল আপডেট (প্রফেশনাল সিকিউরিটি সহ)
+export const updateDoctorProfile = async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    
+    // যে ফিল্ডগুলো ডাক্তার এডিট করতে পারবে
+    const updateData = {
+      consultationFee: Number(req.body.consultationFee),
+      experienceYears: Number(req.body.experienceYears),
+      phone: req.body.phone,
+      address: req.body.address,
+      bio: req.body.bio,
+      availableDays: Array.isArray(req.body.availableDays) ? req.body.availableDays : req.body.availableDays?.split(",").map(i => i.trim()),
+      languages: Array.isArray(req.body.languages) ? req.body.languages : req.body.languages?.split(",").map(i => i.trim()),
+      startTime: req.body.startTime,
+      endTime: req.body.endTime,
+      updatedAt: new Date()
+    };
+
+    const result = await db.collection("doctors").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) return res.status(404).json({ message: "Doctor not found" });
+
+    res.json({ success: true, message: "Profile updated successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+
+export const getDoctorsFiltered = async (req, res) => {
+  try {
+    const db = getDB();
+
+    const { hospitalId } = req.params;
+    const { specialization, search, sortBy } = req.query;
+
+    if (!ObjectId.isValid(hospitalId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Hospital ID",
+      });
+    }
+
+    const query = {
+      hospitalId: new ObjectId(hospitalId),
+    };
+
+    // Specialization Filter
+    if (
+      specialization &&
+      specialization !== "all" &&
+      specialization.trim() !== ""
+    ) {
+      query.specialization = specialization.trim();
+    }
+
+    // Search By Name
+    if (search && search.trim() !== "") {
+      query.fullName = {
+        $regex: search.trim(),
+        $options: "i",
+      };
+    }
+
+    // Sorting
+    let sortCriteria = { createdAt: -1 };
+
+    switch (sortBy) {
+      case "fee-low":
+        sortCriteria = { consultationFee: 1 };
+        break;
+
+      case "fee-high":
+        sortCriteria = { consultationFee: -1 };
+        break;
+
+      case "exp":
+        sortCriteria = { experienceYears: -1 };
+        break;
+
+      case "rating":
+        sortCriteria = { rating: -1 };
+        break;
+
+      default:
+        sortCriteria = { createdAt: -1 };
+    }
+
+    console.log("FILTER QUERY =", query);
+    console.log("SORT =", sortCriteria);
+
+    const doctors = await db
+      .collection("doctors")
+      .find(query)
+      .sort(sortCriteria)
+      .toArray();
+
+    res.json({
+      success: true,
+      count: doctors.length,
+      doctors,
+    });
+  } catch (err) {
+    console.error("GET FILTERED DOCTORS ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+export const getHospitalSpecializations = async (req, res) => {
+  try {
+    const db = getDB();
+
+    const { hospitalId } = req.params;
+
+    if (!ObjectId.isValid(hospitalId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Hospital ID",
+      });
+    }
+
+    const specializations = await db
+      .collection("doctors")
+      .distinct("specialization", {
+        hospitalId: new ObjectId(hospitalId),
+        specialization: {
+          $exists: true,
+          $ne: "",
+        },
+      });
+
+    const cleanedSpecializations = specializations
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
+
+    res.json({
+      success: true,
+      count: cleanedSpecializations.length,
+      specializations: cleanedSpecializations,
+    });
+  } catch (err) {
+    console.error("GET SPECIALIZATION ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
