@@ -234,18 +234,61 @@ export const getMyAppointments = async (req, res) => {
 
 
 // নতুন এই ফাংশনটি যোগ করুন
+// export const getAppointmentById = async (req, res) => {
+//   try {
+//     const db = getDB();
+//     const appointment = await db.collection("appointments").findOne({ 
+//       _id: new ObjectId(req.params.id) 
+//     });
+    
+//     if (!appointment) {
+//       return res.status(404).json({ success: false, message: "Appointment not found" });
+//     }
+    
+//     res.json(appointment);
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
+
 export const getAppointmentById = async (req, res) => {
   try {
     const db = getDB();
-    const appointment = await db.collection("appointments").findOne({ 
-      _id: new ObjectId(req.params.id) 
-    });
-    
-    if (!appointment) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+
+    const appointment = await db.collection("appointments").aggregate([
+      {
+        $match: {
+          _id: new ObjectId(req.params.id),
+        },
+      },
+      {
+        $lookup: {
+          from: "doctors",
+          localField: "doctorId",
+          foreignField: "_id",
+          as: "doctorDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$doctorDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]).toArray();
+
+    if (!appointment.length) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
     }
-    
-    res.json(appointment);
+
+    res.json({
+      success: true,
+      appointment: appointment[0],
+    });
+
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
