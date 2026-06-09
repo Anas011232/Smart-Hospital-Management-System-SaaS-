@@ -665,3 +665,63 @@ export const finishConsultation = async (req, res) => {
     });
   }
 };
+
+export const cancelAppointment = async (req, res) => {
+  try {
+    const db = getDB();
+
+    const appointmentId = req.params.id;
+    const patientId = req.user.id;
+
+    const appointment = await db.collection("appointments").findOne({
+      _id: new ObjectId(appointmentId),
+    });
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+    // appointment owner check
+    if (appointment.patientId.toString() !== patientId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // completed appointment cancel করা যাবে না
+    if (appointment.consultationStatus === "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Completed appointment cannot be cancelled",
+      });
+    }
+
+    await db.collection("appointments").updateOne(
+      {
+        _id: new ObjectId(appointmentId),
+      },
+      {
+        $set: {
+          status: "cancelled",
+          consultationStatus: "cancelled",
+          cancelledAt: new Date(),
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Appointment cancelled successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};

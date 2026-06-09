@@ -13,6 +13,7 @@ import {
   getQueueBoard,
   startConsultation,
   finishConsultation,
+  cancelAppointment,
 } from "../controllers/appointmentController.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -52,5 +53,7 @@ router.get("/queue/stats", getQueueStats);
 
 // Queue board (display board for all active queues)
 router.get("/queue/board", getQueueBoard);
+
+router.patch("/cancel/:id", authMiddleware, cancelAppointment);
 
 export default router;
