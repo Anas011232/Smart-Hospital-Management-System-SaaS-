@@ -272,6 +272,7 @@ import {
   Activity,
   UserCog,
 } from "lucide-react";
+import Navbar from "../../../components/Navbar.jsx";
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -335,9 +336,58 @@ export default function Login() {
     }
   };
 
+  // Pre-defined deterministic particle positions (NO Math.random - fixes hydration error)
+  const particles = [
+    { left: "10%", top: "20%", delay: "0s" },
+    { left: "85%", top: "15%", delay: "3s" },
+    { left: "30%", top: "70%", delay: "6s" },
+    { left: "65%", top: "45%", delay: "9s" },
+    { left: "90%", top: "80%", delay: "12s" },
+    { left: "15%", top: "55%", delay: "15s" },
+    { left: "75%", top: "25%", delay: "18s" },
+    { left: "50%", top: "90%", delay: "21s" },
+    { left: "20%", top: "85%", delay: "24s" },
+    { left: "80%", top: "5%", delay: "27s" },
+    { left: "40%", top: "35%", delay: "2s" },
+    { left: "95%", top: "50%", delay: "5s" },
+    { left: "5%", top: "65%", delay: "8s" },
+    { left: "60%", top: "10%", delay: "11s" },
+    { left: "25%", top: "95%", delay: "14s" },
+    { left: "70%", top: "60%", delay: "17s" },
+    { left: "35%", top: "40%", delay: "20s" },
+    { left: "88%", top: "30%", delay: "23s" },
+    { left: "12%", top: "75%", delay: "26s" },
+    { left: "55%", top: "55%", delay: "1s" },
+    { left: "48%", top: "28%", delay: "4s" },
+    { left: "72%", top: "88%", delay: "7s" },
+    { left: "28%", top: "42%", delay: "10s" },
+    { left: "93%", top: "68%", delay: "13s" },
+    { left: "18%", top: "92%", delay: "16s" },
+    { left: "62%", top: "3%", delay: "19s" },
+    { left: "44%", top: "78%", delay: "22s" },
+    { left: "77%", top: "52%", delay: "25s" },
+    { left: "33%", top: "12%", delay: "28s" },
+    { left: "86%", top: "95%", delay: "31s" },
+    { left: "8%", top: "38%", delay: "34s" },
+    { left: "59%", top: "67%", delay: "37s" },
+    { left: "96%", top: "22%", delay: "40s" },
+    { left: "23%", top: "58%", delay: "43s" },
+    { left: "51%", top: "48%", delay: "46s" },
+  ];
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-950 flex items-center justify-center px-4 py-10">
-      {/* Orbit Ring Container */}
+
+    <div> 
+
+      <div>
+        <Navbar></Navbar>
+      </div>
+
+    <div className="min-h-screen relative overflow-hidden pt-25 bg-slate-950 flex items-center justify-center px-4 py-10">
+      {/* Orbit Ring Container - ALL ANIMATIONS WORKING */}
+
+      
+
       <div className="relative">
         {/* Outer Large Blurred Glow Ring */}
         <div className="absolute -inset-12 opacity-40 hover:opacity-70 transition-opacity duration-500">
@@ -393,7 +443,7 @@ export default function Login() {
           ></div>
         </div>
 
-        {/* Energy Particle Trail */}
+        {/* Energy Particle Trail - ALL 3 PARTICLES WITH DELAY */}
         <div className="absolute -inset-6 opacity-30 hover:opacity-60 transition-opacity duration-500">
           <div 
             className="absolute inset-0 rounded-[3.2rem] animate-[rotate-360_10s_linear_infinite]"
@@ -418,7 +468,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Background Decorative Elements */}
+      {/* Background Decorative Elements - ALL ANIMATIONS */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating Orbs */}
         <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-500/8 rounded-full blur-3xl animate-[float_12s_ease-in-out_infinite]"></div>
@@ -426,16 +476,16 @@ export default function Login() {
         <div className="absolute bottom-[-150px] right-[-100px] w-[450px] h-[450px] bg-cyan-500/8 rounded-full blur-3xl animate-[float_16s_ease-in-out_infinite]"></div>
         <div className="absolute top-[60%] left-[50%] w-[250px] h-[250px] bg-purple-500/6 rounded-full blur-3xl animate-[float_13s_ease-in-out_infinite_reverse]"></div>
 
-        {/* Particle Dots */}
+        {/* Particle Dots - DETERMINISTIC (NO Math.random) - ANIMATION STILL WORKS */}
         <div className="absolute inset-0">
-          {[...Array(35)].map((_, i) => (
+          {particles.map((particle, i) => (
             <div
               key={i}
               className="absolute w-0.5 h-0.5 bg-blue-400/15 rounded-full animate-[particle-fade_30s_linear_infinite]"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 30}s`,
+                left: particle.left,
+                top: particle.top,
+                animationDelay: particle.delay,
               }}
             />
           ))}
@@ -445,16 +495,16 @@ export default function Login() {
       {/* Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]" />
 
-      {/* Login Card */}
+      {/* Login Card - ALL ANIMATIONS */}
       <div className="relative z-10 w-full max-w-md">
         <div 
           className="relative overflow-hidden rounded-3xl bg-slate-900/60 backdrop-blur-2xl border border-slate-700/30 shadow-[0_20px_80px_rgba(37,99,235,0.12)] animate-[card-enter_1s_ease-out] hover:shadow-[0_25px_100px_rgba(37,99,235,0.25)] hover:border-slate-600/50 transition-all duration-500"
         >
-          {/* Top Glow */}
+          {/* Top Glow - ANIMATED */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-violet-500 to-cyan-500 animate-[shimmer_3s_linear_infinite] bg-[size:200%_100%]"></div>
 
           <div className="p-7 sm:p-10">
-            {/* Header */}
+            {/* Header - ALL ANIMATIONS */}
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-slate-900/60 backdrop-blur-xl border border-blue-500/20 shadow-lg animate-[badge-float_3s_ease-in-out_infinite] hover:border-blue-500/40 transition-all duration-300">
                 <Sparkles className="text-blue-400 animate-[sparkle_2s_ease-in-out_infinite]" size={18} />
@@ -465,16 +515,16 @@ export default function Login() {
 
               <div className="mt-7 flex justify-center">
                 <div className="relative">
-                  {/* Rotating Rings */}
+                  {/* Rotating Rings - ANIMATED */}
                   <div className="absolute inset-0 w-20 h-20 rounded-3xl border border-blue-500/20 animate-[spin_10s_linear_infinite]"></div>
                   <div className="absolute inset-0 w-20 h-20 rounded-3xl border border-violet-500/15 animate-[spin_8s_linear_infinite_reverse]"></div>
                   
-                  {/* Main Logo */}
+                  {/* Main Logo - ALL ANIMATIONS */}
                   <div className="w-20 h-20 rounded-3xl bg-gradient-to-r from-blue-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-2xl animate-[logo-bounce_4s_ease-in-out_infinite] hover:scale-110 transition-all duration-300">
                     <ShieldCheck className="text-white animate-[icon-pulse_2s_ease-in-out_infinite]" size={38} />
                   </div>
 
-                  {/* Glow Effect */}
+                  {/* Glow Effect - ANIMATED */}
                   <div className="absolute inset-0 w-20 h-20 rounded-3xl bg-gradient-to-r from-blue-500/30 via-violet-500/30 to-cyan-500/30 blur-xl animate-[glow_3s_ease-in-out_infinite]"></div>
                 </div>
               </div>
@@ -490,7 +540,7 @@ export default function Login() {
               </p>
             </div>
 
-            {/* Inputs */}
+            {/* Inputs - ALL ANIMATIONS */}
             <div className="space-y-5">
               <Input
                 icon={<Mail className="animate-[icon-fade_2s_ease-in-out_infinite]" size={18} />}
@@ -518,7 +568,7 @@ export default function Login() {
                 }
               />
 
-              {/* Role Select */}
+              {/* Role Select - ANIMATED */}
               <div className="flex items-center rounded-2xl border border-slate-700/30 bg-slate-900/60 overflow-hidden transition-all duration-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/50 animate-[input-slide_1.4s_ease-out] hover:border-slate-600/50">
                 <div className="px-4 text-blue-400 flex items-center justify-center animate-[icon-fade_2s_ease-in-out_infinite_2s]">
                   <UserCog size={18} />
@@ -542,7 +592,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Login Button */}
+            {/* Login Button - ALL ANIMATIONS */}
             <button
               onClick={handleLogin}
               disabled={loading}
@@ -568,8 +618,9 @@ export default function Login() {
           </div>
         </div>
       </div>
+      </div>
 
-      {/* Custom Animations */}
+      {/* ALL ANIMATIONS KEPT - Only removed Math.random() */}
       <style jsx>{`
         @keyframes rotate-360 {
           0% { transform: rotate(0deg); }

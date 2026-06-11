@@ -485,7 +485,7 @@ import {
   CreditCard,
   Sparkles,
 } from "lucide-react";
-
+import Navbar from "../../../../components/Navbar";
 export default function HospitalRegister() {
   const router = useRouter();
 
@@ -590,7 +590,12 @@ export default function HospitalRegister() {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-950 py-10 px-4">
+        <div> 
+
+      <div>
+        <Navbar></Navbar>
+      </div>
+    <div className="min-h-screen relative overflow-hidden pt-18 bg-slate-950 py-10 px-4">
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating Orbs */}
@@ -954,6 +959,7 @@ export default function HospitalRegister() {
             </button>
           </div>
         </form>
+      </div>
       </div>
 
       {/* Custom Animations */}

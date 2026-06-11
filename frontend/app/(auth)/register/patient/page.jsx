@@ -385,7 +385,7 @@ import {
   Sparkles,
   Activity,
 } from "lucide-react";
-
+import Navbar from "../../../../components/Navbar";
 export default function PatientRegister() {
   const [form, setForm] = useState({
     name: "",
@@ -470,7 +470,12 @@ export default function PatientRegister() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-950">
+        <div> 
+
+      <div>
+        <Navbar></Navbar>
+      </div>
+    <div className="min-h-screen pt-18 relative overflow-hidden bg-slate-950">
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating Orbs */}
@@ -732,6 +737,7 @@ export default function PatientRegister() {
             </button>
           </div>
         </form>
+      </div>
       </div>
 
       {/* Custom Animations */}
