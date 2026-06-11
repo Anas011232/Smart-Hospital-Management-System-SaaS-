@@ -3,53 +3,172 @@ import { getDB } from "../config/db.js";
 import { emitQueueUpdate, getIO } from "../socket/queue.socket.js";
 
 // ATOMIC serial number generation using MongoDB counters
+// export const createAppointment = async (req, res) => {
+//   try {
+//     const db = getDB();
+//     const { doctorId, patientInfo } = req.body;
+//     const appointmentDate = patientInfo.appointmentDate;
+
+//     // Find max serial for this doctor on this date
+//     const lastAppointment = await db
+//       .collection("appointments")
+//       .findOne(
+//         {
+//           doctorId: new ObjectId(doctorId),
+//           "patientInfo.appointmentDate": appointmentDate,
+//         },
+//         { sort: { serialNumber: -1 } }
+//       );
+
+//     const serialNumber = (lastAppointment?.serialNumber || 0) + 1;
+
+//     const appointment = {
+//       patientId: new ObjectId(req.user.id),
+//       doctorId: new ObjectId(doctorId),
+//       patientInfo,
+//       serialNumber,
+//       status: "pending",
+//       consultationStatus: null, // Will be set to "waiting" when doctor accepts
+//       consultationStartedAt: null,
+//       consultationEndedAt: null,
+//       createdAt: new Date(),
+//       updatedAt: new Date(),
+//     };
+
+//     const result = await db.collection("appointments").insertOne(appointment);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Appointment request sent",
+//       appointmentId: result.insertedId,
+//       serialNumber,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       success: false,
+//       message: err.message,
+//     });
+//   }
+// };
+
+
+
+
+
 export const createAppointment = async (req, res) => {
   try {
     const db = getDB();
     const { doctorId, patientInfo } = req.body;
+
+    if (!doctorId) {
+      return res.status(400).json({
+        success: false,
+        message: "Doctor ID required",
+      });
+    }
+
+    const doctor = await db.collection("doctors").findOne({
+      _id: new ObjectId(doctorId),
+    });
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+
+    // DATE CHECK
     const appointmentDate = patientInfo.appointmentDate;
 
-    // Find max serial for this doctor on this date
-    const lastAppointment = await db
-      .collection("appointments")
-      .findOne(
-        {
-          doctorId: new ObjectId(doctorId),
-          "patientInfo.appointmentDate": appointmentDate,
-        },
-        { sort: { serialNumber: -1 } }
-      );
+    const [y, m, d] = appointmentDate.split("-").map(Number);
+    const selectedDate = new Date(y, m - 1, d);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: "Past date not allowed",
+      });
+    }
+
+    // DAY CHECK
+    const dayNames = [
+      "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"
+    ];
+
+    const selectedDay = dayNames[selectedDate.getDay()];
+
+    const isAvailable = doctor.availableDays?.some(
+      (d) => d.trim().toLowerCase() === selectedDay.toLowerCase()
+    );
+
+    if (!isAvailable) {
+      return res.status(400).json({
+        success: false,
+        message: "Doctor unavailable on this day",
+      });
+    }
+
+    // DAILY LIMIT ONLY
+    const totalPatients = await db.collection("appointments").countDocuments({
+      doctorId: new ObjectId(doctorId),
+      "patientInfo.appointmentDate": appointmentDate,
+      status: { $ne: "cancelled" },
+    });
+
+    if (totalPatients >= doctor.maxPatientsPerDay) {
+      return res.status(400).json({
+        success: false,
+        message: "Daily patient limit reached",
+      });
+    }
+
+    // SERIAL
+    const lastAppointment = await db.collection("appointments").findOne(
+      {
+        doctorId: new ObjectId(doctorId),
+        "patientInfo.appointmentDate": appointmentDate,
+      },
+      { sort: { serialNumber: -1 } }
+    );
 
     const serialNumber = (lastAppointment?.serialNumber || 0) + 1;
 
+    // CREATE
     const appointment = {
       patientId: new ObjectId(req.user.id),
       doctorId: new ObjectId(doctorId),
       patientInfo,
       serialNumber,
       status: "pending",
-      consultationStatus: null, // Will be set to "waiting" when doctor accepts
-      consultationStartedAt: null,
-      consultationEndedAt: null,
+      consultationStatus: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     const result = await db.collection("appointments").insertOne(appointment);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Appointment request sent",
+      message: "Appointment created successfully",
       appointmentId: result.insertedId,
       serialNumber,
     });
+
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message,
     });
   }
 };
+
+
+
 
 
 // export const createAppointment = async (req, res) => {
