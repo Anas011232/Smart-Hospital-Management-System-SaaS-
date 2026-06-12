@@ -187,7 +187,7 @@ export default function DoctorProfile() {
     }
   };
 
-  const pageBg = "min-h-screen bg-[radial-gradient(ellipse_at_top,_#0b1020_0%,_#05070f_55%,_#070a14_100%)] relative overflow-hidden flex items-center justify-center";
+  const pageBg = "min-h-screen bg-[radial-gradient(ellipse_at_top,_#0b1020_0%,_#05070f_55%,_#070a14_100%)] relative overflow-hidden flex items-center justify-center pt-5 pb-5";
 
   const GridOverlay = () => (
     <div
