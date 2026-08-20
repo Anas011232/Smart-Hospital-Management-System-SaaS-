@@ -358,6 +358,144 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const easing = [0.4, 0, 0.2, 1];
 
+// শেয়ার্ড ইনপুট স্টাইল — মডিউল স্কোপে যাতে SmartInput ও PrescribePage দুটোই ব্যবহার করতে পারে
+const inputClass =
+  "w-full border border-white/[0.08] bg-slate-800/40 text-white placeholder:text-slate-500 p-3 rounded-xl text-sm outline-none transition-all duration-200 focus:border-blue-400/60 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.18),0_0_24px_-6px_rgba(59,130,246,0.35)] focus:scale-[1.01] hover:border-white/[0.15]";
+
+// প্রি-সেট অপশন লিস্ট
+const DOSAGE_OPTIONS = [
+  "1+0+0", "0+1+0", "0+0+1",
+  "1+1+0", "1+0+1", "0+1+1",
+  "1+1+1",
+  "2+0+0", "0+2+0", "0+0+2",
+  "2+0+1", "1+0+2", "2+1+0", "0+1+2", "1+2+0", "0+2+1",
+  "2+1+1", "1+2+1", "1+1+2",
+  "2+2+1", "1+2+2", "2+2+2",
+];
+
+const DURATION_OPTIONS = [
+  "1 Day", "2 Days", "3 Days", "4 Days", "5 Days", "6 Days", "7 Days",
+];
+
+const INSTRUCTION_OPTIONS = [
+  "Before Meal", "After Meal", "With Food", "Empty Stomach",
+  "At Bedtime", "Before Breakfast", "After Breakfast",
+  "Before Lunch", "After Lunch", "Before Dinner", "After Dinner",
+  "With Plenty of Water",
+];
+
+/**
+ * SmartInput — একটি reusable autocomplete input।
+ * প্রতিটি instance নিজের open/highlight state রাখে, তাই একাধিক medicine
+ * row-এ আলাদা আলাদা dropdown একসাথে/স্বাধীনভাবে কাজ করে — কোনো shared
+ * index ছাড়াই। মেডিসিন-নেম autocomplete-এর সাথে এটা সম্পূর্ণ স্বতন্ত্র।
+ */
+function SmartInput({ value, onChange, options, placeholder, onFocus }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(-1);
+  const wrapperRef = useRef(null);
+
+  const query = (value || "").toLowerCase().trim();
+  const filtered = query
+    ? options.filter((opt) => {
+        const lower = opt.toLowerCase();
+        return lower.startsWith(query) || lower.includes(" " + query);
+      })
+    : options;
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setIsOpen(false);
+        setHighlightIndex(-1);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectOption = (opt) => {
+    onChange(opt);
+    setIsOpen(false);
+    setHighlightIndex(-1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!isOpen) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setIsOpen(true);
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIndex((prev) => (prev + 1 >= filtered.length ? 0 : prev + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIndex((prev) => (prev - 1 < 0 ? filtered.length - 1 : prev - 1));
+    } else if (e.key === "Enter") {
+      if (highlightIndex >= 0 && filtered[highlightIndex]) {
+        e.preventDefault();
+        selectOption(filtered[highlightIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+      setHighlightIndex(-1);
+    }
+  };
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <input
+        type="text"
+        placeholder={placeholder}
+        autoComplete="off"
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setIsOpen(true);
+          setHighlightIndex(-1);
+        }}
+        onFocus={() => {
+          setIsOpen(true);
+          onFocus?.();
+        }}
+        onKeyDown={handleKeyDown}
+        className={`${inputClass} p-2`}
+      />
+
+      <AnimatePresence>
+        {isOpen && filtered.length > 0 && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15, ease: easing }}
+            className="absolute left-0 top-full mt-2 w-full min-w-[160px] bg-slate-950/95 backdrop-blur-xl border border-white/[0.12] rounded-xl max-h-56 overflow-y-auto shadow-2xl shadow-black/50 z-[9999]"
+          >
+            {filtered.map((opt, i) => (
+              <li
+                key={opt}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => selectOption(opt)}
+                className={`p-2.5 text-sm cursor-pointer border-b border-white/[0.06] last:border-b-0 transition-colors duration-150 ${
+                  i === highlightIndex
+                    ? "bg-blue-600/30 text-white"
+                    : "text-slate-200 hover:bg-blue-600/20"
+                }`}
+              >
+                {opt}
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function PrescribePage({ params: paramsPromise }) {
   const params = use(paramsPromise);
   const appointmentId = params.id;
@@ -372,9 +510,9 @@ export default function PrescribePage({ params: paramsPromise }) {
   const [medicines, setMedicines] = useState([
     {
       name: "",
-      dosage: "1+0+1",
-      duration: "7 Days",
-      instruction: "After Meal",
+      dosage: "",
+      duration: "",
+      instruction: "",
     },
   ]);
 
@@ -385,6 +523,10 @@ export default function PrescribePage({ params: paramsPromise }) {
   const [suggestions, setSuggestions] = useState([]);
   const [activeMedIndex, setActiveMedIndex] = useState(null);
   const wrapperRefs = useRef([]);
+
+  // যেকোনো field (name/dosage/duration/instruction)-এ focus হলে সেই row-কে
+  // z-index-এ উপরে তুলে ধরে, যাতে dropdown পরের row-এর নিচে চাপা না পড়ে
+  const [activeRowIndex, setActiveRowIndex] = useState(null);
 
   useEffect(() => {
     if (!appointmentId) return;
@@ -443,9 +585,9 @@ export default function PrescribePage({ params: paramsPromise }) {
       ...medicines,
       {
         name: "",
-        dosage: "1+0+1",
-        duration: "7 Days",
-        instruction: "After Meal",
+        dosage: "",
+        duration: "",
+        instruction: "",
       },
     ]);
 
@@ -523,9 +665,6 @@ export default function PrescribePage({ params: paramsPromise }) {
       </div>
     );
   }
-
-  const inputClass =
-    "w-full border border-white/[0.08] bg-slate-800/40 text-white placeholder:text-slate-500 p-3 rounded-xl text-sm outline-none transition-all duration-200 focus:border-blue-400/60 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.18),0_0_24px_-6px_rgba(59,130,246,0.35)] focus:scale-[1.01] hover:border-white/[0.15]";
 
   return (
     <motion.div
@@ -633,7 +772,8 @@ export default function PrescribePage({ params: paramsPromise }) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.25, ease: easing }}
                       className="relative grid grid-cols-1 sm:grid-cols-4 gap-2 border border-white/[0.06] p-3 rounded-xl bg-slate-800/30 hover:border-white/[0.12] transition-colors duration-200"
-                      style={{ zIndex: activeMedIndex === idx ? 50 : 1 }}
+                      style={{ zIndex: activeRowIndex === idx ? 50 : 1 }}
+                      onFocusCapture={() => setActiveRowIndex(idx)}
                     >
                       {/* Medicine Name + Suggestion Dropdown */}
                       <div
@@ -681,34 +821,28 @@ export default function PrescribePage({ params: paramsPromise }) {
                         </AnimatePresence>
                       </div>
 
-                      <input
-                        type="text"
-                        placeholder="Dosage (e.g. 1+0+1)"
+                      <SmartInput
                         value={med.dosage}
-                        onChange={(e) =>
-                          handleMedChange(idx, "dosage", e.target.value)
-                        }
-                        className={`${inputClass} p-2`}
+                        onChange={(value) => handleMedChange(idx, "dosage", value)}
+                        options={DOSAGE_OPTIONS}
+                        placeholder="Dosage (e.g. 1+0+1)"
+                        onFocus={() => setActiveRowIndex(idx)}
                       />
 
-                      <input
-                        type="text"
-                        placeholder="Duration (e.g. 5 Days)"
+                      <SmartInput
                         value={med.duration}
-                        onChange={(e) =>
-                          handleMedChange(idx, "duration", e.target.value)
-                        }
-                        className={`${inputClass} p-2`}
+                        onChange={(value) => handleMedChange(idx, "duration", value)}
+                        options={DURATION_OPTIONS}
+                        placeholder="Duration (e.g. 5 Days)"
+                        onFocus={() => setActiveRowIndex(idx)}
                       />
 
-                      <input
-                        type="text"
-                        placeholder="Instruction"
+                      <SmartInput
                         value={med.instruction}
-                        onChange={(e) =>
-                          handleMedChange(idx, "instruction", e.target.value)
-                        }
-                        className={`${inputClass} p-2`}
+                        onChange={(value) => handleMedChange(idx, "instruction", value)}
+                        options={INSTRUCTION_OPTIONS}
+                        placeholder="Instruction"
+                        onFocus={() => setActiveRowIndex(idx)}
                       />
                     </motion.div>
                   ))}
