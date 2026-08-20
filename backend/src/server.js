@@ -65,6 +65,7 @@ import aiRoutes from "./routes/aiRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import doctorSessionRoutes from "./routes/doctorSessionRoutes.js"; // নতুন রাউট ফাইলটি ইমপোর্ট করুন
 import prescriptionRoutes from "./routes/prescriptionRoutes.js"; // এটিও তৈরি করবেন
+import medicineRoutes from "./routes/medicineRoutes.js";
 
 connectDB();
 
@@ -95,6 +96,8 @@ app.use("/api/appointments", appointmentRoutes);
 // নতুন সেশন এবং প্রেসক্রিপশন রাউটস এখানে ব্যবহার করুন
 app.use("/api/session", doctorSessionRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
+
+app.use("/api/medicines", medicineRoutes);
 
 
 const PORT = process.env.PORT || 5000;
