@@ -1,52 +1,5 @@
-// import dotenv from "dotenv";
-// dotenv.config();
 
-// import express from "express";
-// import cors from "cors";
-
-// import { connectDB } from "./config/db.js";
-
-// import authRoutes from "./routes/authRoutes.js";
-// import hospitalRoutes from "./routes/hospitalRoutes.js";
-// import patientRoutes from "./routes/patientRoutes.js";
-// import doctorRoutes from "./routes/doctorRoutes.js";
-// import aiRoutes from "./routes/aiRoutes.js";
-// import appointmentRoutes from "./routes/appointmentRoutes.js";
-// import { startSession, nextPatient, toggleBreak, getActiveSession } from "./controllers/doctorSessionController.js";
-// import { authMiddleware } from "./middlewares/auth.middleware.js";
-
-// connectDB();
-
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-
-// app.use("/uploads", express.static("uploads"));
-
-// app.use("/api/auth", authRoutes);
-// app.use("/api/hospital", hospitalRoutes);
-// app.use("/api/patient", patientRoutes);
-// app.use("/api/doctors", doctorRoutes);
-
-// // AI ROUTE
-// app.use("/api/ai", aiRoutes);
-
-// app.use("/api/appointments", appointmentRoutes);
-
-// router.post("/start", authMiddleware, startSession);
-// router.post("/next", authMiddleware, nextPatient);
-// router.patch("/break", authMiddleware, toggleBreak);
-// router.get("/active/:doctorId", getActiveSession);
-
-
-// const PORT = process.env.PORT || 5000;
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
-
+import path from "path";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -83,8 +36,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"] // এই লাইনটি না থাকলে টোকেন হেডার ড্রপ হয়ে যায়
 }));
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
-
+// app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // রাউটস রেজিস্টার করুন
 app.use("/api/auth", authRoutes);
 app.use("/api/hospital", hospitalRoutes);
@@ -106,3 +59,62 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+// import dotenv from "dotenv";
+// dotenv.config();
+
+// import express from "express";
+// import http from "http";
+// import cors from "cors";
+// import cookieParser from "cookie-parser"; // 1. cookie-parser ইমপোর্ট করুন
+// import { connectDB } from "./config/db.js";
+// import { initSocket } from "./socket/queue.socket.js";
+
+// // রাউটস ইমপোর্ট
+// import authRoutes from "./routes/authRoutes.js";
+// import hospitalRoutes from "./routes/hospitalRoutes.js";
+// import patientRoutes from "./routes/patientRoutes.js";
+// import doctorRoutes from "./routes/doctorRoutes.js";
+// import aiRoutes from "./routes/aiRoutes.js";
+// import appointmentRoutes from "./routes/appointmentRoutes.js";
+// import doctorSessionRoutes from "./routes/doctorSessionRoutes.js";
+// import prescriptionRoutes from "./routes/prescriptionRoutes.js";
+// import medicineRoutes from "./routes/medicineRoutes.js";
+// import testRoutes from "./routes/testRoutes.js";
+
+// connectDB();
+
+// const app = express();
+// const server = http.createServer(app);
+
+// initSocket(server);
+
+// // 2. CORS কনফিগারেশনে X-CSRF-Token হেডারটি যোগ করুন
+// app.use(cors({
+//   origin: "http://localhost:3000",
+//   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+//   credentials: true,
+//   allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"] // এখানে X-CSRF-Token যোগ করা জরুরি
+// }));
+
+// app.use(express.json());
+// app.use(cookieParser()); // 3. cookie-parser মিডলওয়্যারটি অবশ্যই এখানে (অন্যান্য রাউটের আগে) যুক্ত করুন!
+// app.use("/uploads", express.static("uploads"));
+
+// // রাউটস রেজিস্টার করুন
+// app.use("/api/auth", authRoutes);
+// app.use("/api/hospital", hospitalRoutes);
+// app.use("/api/patient", patientRoutes);
+// app.use("/api/doctors", doctorRoutes);
+// app.use("/api/ai", aiRoutes);
+// app.use("/api/appointments", appointmentRoutes);
+// app.use("/api/session", doctorSessionRoutes);
+// app.use("/api/prescriptions", prescriptionRoutes);
+// app.use("/api/medicines", medicineRoutes);
+// app.use("/api/tests", testRoutes);
+
+// const PORT = process.env.PORT || 5000;
+
+// server.listen(PORT, () => {
+//   console.log(`🚀 Server running on port ${PORT}`);
+// });

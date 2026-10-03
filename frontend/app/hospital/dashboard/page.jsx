@@ -31,7 +31,7 @@ import {
   XCircle,
   Sparkles,
 } from "lucide-react";
-import DoctorCTASection from "../../../components/doctor/DoctorCTASection";
+
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -88,19 +88,19 @@ function InfoCard({ icon: Icon, label, value, accent = "blue", href }) {
 
   const content = (
     <div
-      className={`group relative flex items-start gap-4 p-5 rounded-2xl
+      className={`group relative flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl
         bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm
         transition-all duration-300 hover:bg-white/[0.07] hover:scale-[1.02]
         hover:shadow-lg ${accents[accent]} cursor-default`}
     >
       <div
-        className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
+        className={`flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center
           bg-white/[0.06] border border-white/[0.08] ${iconAccents[accent]}`}
       >
-        <Icon size={18} />
+        <Icon size={17} className="sm:w-[18px] sm:h-[18px]" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1">
+        <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-1">
           {label}
         </p>
         <p className="text-sm font-medium text-slate-200 leading-snug break-all">
@@ -122,18 +122,18 @@ function InfoCard({ icon: Icon, label, value, accent = "blue", href }) {
 function StatCard({ icon: Icon, label, value, gradient }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl p-5 border border-white/[0.08]
+      className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 border border-white/[0.08]
         bg-gradient-to-br ${gradient} transition-all duration-300
         hover:scale-[1.03] hover:shadow-xl cursor-default group`}
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-      <div className="relative z-10 flex flex-col gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white/[0.12] flex items-center justify-center">
-          <Icon size={20} className="text-white" />
+      <div className="relative z-10 flex flex-col gap-2 sm:gap-3">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/[0.12] flex items-center justify-center">
+          <Icon size={18} className="text-white sm:w-5 sm:h-5" />
         </div>
         <div>
-          <p className="text-3xl font-bold text-white tracking-tight">{value ?? "—"}</p>
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/60 mt-1">
+          <p className="text-2xl sm:text-3xl font-bold text-white tracking-tight break-words">{value ?? "—"}</p>
+          <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-white/60 mt-1">
             {label}
           </p>
         </div>
@@ -146,8 +146,8 @@ function StatCard({ icon: Icon, label, value, gradient }) {
 function Badge({ children, className = "" }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full
-        text-xs font-semibold border tracking-wide ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full
+        text-[11px] sm:text-xs font-semibold border tracking-wide whitespace-nowrap ${className}`}
     >
       {children}
     </span>
@@ -156,11 +156,11 @@ function Badge({ children, className = "" }) {
 
 function SectionTitle({ icon: Icon, title }) {
   return (
-    <div className="flex items-center gap-3 mb-5">
-      <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-        <Icon size={15} className="text-blue-400" />
+    <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5">
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+        <Icon size={14} className="text-blue-400 sm:w-[15px] sm:h-[15px]" />
       </div>
-      <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">{title}</h2>
+      <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-slate-400">{title}</h2>
       <div className="flex-1 h-px bg-white/[0.05]" />
     </div>
   );
@@ -173,7 +173,7 @@ function SubscriptionPanel({ hospital }) {
   return (
     <div
       className="relative overflow-hidden rounded-2xl border border-white/[0.08]
-        bg-white/[0.03] backdrop-blur-sm p-6"
+        bg-white/[0.03] backdrop-blur-sm p-4 sm:p-6"
     >
       {/* background accent */}
       <div
@@ -181,11 +181,11 @@ function SubscriptionPanel({ hospital }) {
           rounded-full blur-3xl opacity-10 bg-gradient-to-br ${pc}`}
       />
 
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-6">
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6">
         {/* plan badge */}
         <div className="flex-shrink-0">
           <div
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl
+            className={`inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl
               bg-gradient-to-r ${pc} shadow-lg`}
           >
             <Star size={16} className="text-white" />
@@ -195,7 +195,7 @@ function SubscriptionPanel({ hospital }) {
           </div>
         </div>
 
-        <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Status</p>
             <Badge className={sc}>
@@ -262,14 +262,14 @@ export default function Dashboard() {
   /* ── Loading ── */
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 rounded-full border-2 border-blue-500/20" />
             <div className="absolute inset-0 rounded-full border-t-2 border-cyan-400 animate-spin" />
             <div className="absolute inset-2 rounded-full border-t-2 border-blue-400 animate-spin [animation-direction:reverse] [animation-duration:700ms]" />
           </div>
-          <p className="text-slate-400 text-sm font-medium tracking-wide animate-pulse">
+          <p className="text-slate-400 text-sm font-medium tracking-wide animate-pulse text-center">
             Loading hospital profile…
           </p>
         </div>
@@ -279,7 +279,7 @@ export default function Dashboard() {
 
   if (!hospital) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
         <div className="text-center">
           <AlertCircle size={40} className="text-red-400 mx-auto mb-3" />
           <p className="text-slate-300 font-medium">Failed to load hospital data.</p>
@@ -312,36 +312,19 @@ export default function Dashboard() {
         }}
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
         {/* ══════════════ HEADER ══════════════ */}
-        <header className="mb-10">
+        <header className="mb-8 sm:mb-10">
           {/* top bar */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/[0.08] backdrop-blur-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/[0.05] border border-white/[0.08] backdrop-blur-sm">
               <Hospital size={14} className="text-cyan-400" />
-              <span className="text-xs font-semibold text-slate-400 tracking-widest uppercase">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 tracking-widest uppercase">
                 Hospital Portal
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleLogout}
-                className="
-    flex items-center gap-2
-    px-4 py-2
-    rounded-xl
-    bg-red-500/10
-    border border-red-500/20
-    text-red-400
-    hover:bg-red-500/20
-    hover:border-red-500/40
-    transition-all duration-300
-  "
-              >
-                <LogOut size={16} />
-                Logout
-              </button>
+            <div className="flex flex-wrap items-center gap-2 ml-auto">
               {hospital.isVerified ? (
                 <Badge className="text-emerald-400 bg-emerald-400/10 border-emerald-500/30">
                   <BadgeCheck size={12} />
@@ -359,11 +342,30 @@ export default function Dashboard() {
                   Blocked
                 </Badge>
               )}
+              <button
+                onClick={handleLogout}
+                className="
+    flex items-center gap-1.5 sm:gap-2
+    px-3 sm:px-4 py-1.5 sm:py-2
+    rounded-xl
+    bg-red-500/10
+    border border-red-500/20
+    text-red-400
+    text-xs sm:text-sm
+    hover:bg-red-500/20
+    hover:border-red-500/40
+    transition-all duration-300
+    whitespace-nowrap
+  "
+              >
+                <LogOut size={15} className="sm:w-4 sm:h-4" />
+                Logout
+              </button>
             </div>
           </div>
 
           {/* hero row */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
             {/* avatar */}
             <div className="relative flex-shrink-0">
               <div
@@ -386,28 +388,28 @@ export default function Dashboard() {
             </div>
 
             {/* name + meta */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 w-full">
               <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight
+                className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight
                   bg-gradient-to-r from-white via-cyan-200 to-blue-400 bg-clip-text text-transparent
-                  leading-tight"
+                  leading-tight break-words"
                 style={{ fontFamily: "'Sora', sans-serif" }}
               >
                 {hospital.hospitalName}
               </h1>
-              <div className="flex flex-wrap items-center gap-3 mt-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-3">
                 <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <MapPin size={12} className="text-cyan-400" />
+                  <MapPin size={12} className="text-cyan-400 flex-shrink-0" />
                   {hospital.city}{hospital.country ? `, ${hospital.country}` : ""}
                 </span>
-                <span className="w-1 h-1 rounded-full bg-slate-600" />
+                <span className="w-1 h-1 rounded-full bg-slate-600 hidden sm:block" />
                 <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <Layers size={12} className="text-blue-400" />
+                  <Layers size={12} className="text-blue-400 flex-shrink-0" />
                   {hospital.hospitalType || "General"}
                 </span>
-                <span className="w-1 h-1 rounded-full bg-slate-600" />
+                <span className="w-1 h-1 rounded-full bg-slate-600 hidden sm:block" />
                 <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <CalendarDays size={12} className="text-violet-400" />
+                  <CalendarDays size={12} className="text-violet-400 flex-shrink-0" />
                   Est. {hospital.establishedYear || "—"}
                 </span>
               </div>
@@ -429,15 +431,15 @@ export default function Dashboard() {
         </header>
 
         {/* ══════════════ SUBSCRIPTION PANEL ══════════════ */}
-        <section className="mb-8">
+        <section className="mb-7 sm:mb-8">
           <SectionTitle icon={CreditCard} title="Subscription" />
           <SubscriptionPanel hospital={hospital} />
         </section>
 
         {/* ══════════════ STATS ══════════════ */}
-        <section className="mb-8">
+        <section className="mb-7 sm:mb-8">
           <SectionTitle icon={TrendingUp} title="Key Statistics" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <StatCard
               icon={Stethoscope}
               label="Total Doctors"
@@ -466,7 +468,7 @@ export default function Dashboard() {
         </section>
 
         {/* ══════════════ CONTACT INFO ══════════════ */}
-        <section className="mb-8">
+        <section className="mb-7 sm:mb-8">
           <SectionTitle icon={User} title="Contact Information" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <InfoCard icon={User} label="Owner / Admin" value={hospital.ownerName} accent="blue" />
@@ -490,11 +492,11 @@ export default function Dashboard() {
         </section>
 
         {/* ══════════════ SECURITY & COMPLIANCE ══════════════ */}
-        <section className="mb-8">
+        <section className="mb-7 sm:mb-8">
           <SectionTitle icon={ShieldCheck} title="Security & Compliance" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div
-              className={`flex items-start gap-4 p-5 rounded-2xl border backdrop-blur-sm
+              className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl border backdrop-blur-sm
                 transition-all duration-300 hover:scale-[1.02]
                 ${hospital.isVerified
                   ? "bg-emerald-500/[0.06] border-emerald-500/20 hover:border-emerald-500/40"
@@ -502,7 +504,7 @@ export default function Dashboard() {
                 }`}
             >
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center border
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border flex-shrink-0
                   ${hospital.isVerified
                     ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                     : "bg-amber-500/10 border-amber-500/20 text-amber-400"
@@ -524,7 +526,7 @@ export default function Dashboard() {
             </div>
 
             <div
-              className={`flex items-start gap-4 p-5 rounded-2xl border backdrop-blur-sm
+              className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl border backdrop-blur-sm
                 transition-all duration-300 hover:scale-[1.02]
                 ${!hospital.isBlocked
                   ? "bg-emerald-500/[0.06] border-emerald-500/20 hover:border-emerald-500/40"
@@ -532,7 +534,7 @@ export default function Dashboard() {
                 }`}
             >
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center border
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border flex-shrink-0
                   ${!hospital.isBlocked
                     ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                     : "bg-red-500/10 border-red-500/20 text-red-400"
@@ -563,7 +565,7 @@ export default function Dashboard() {
         </section>
 
         {/* ══════════════ SYSTEM METADATA ══════════════ */}
-        <section className="mb-10">
+        <section className="mb-8 sm:mb-10">
           <SectionTitle icon={Sparkles} title="System Info" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <InfoCard icon={Hash} label="Hospital ID" value={hospital._id} accent="blue" />
@@ -572,11 +574,9 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <DoctorCTASection></DoctorCTASection>
-
         {/* ── footer ── */}
         <footer className="border-t border-white/[0.05] pt-6 text-center">
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-600 px-2">
             {hospital.hospitalName} · Hospital Management Portal · {new Date().getFullYear()}
           </p>
         </footer>

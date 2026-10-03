@@ -1,11 +1,25 @@
+// import express from "express";
+// import { registerPatient, getMyProfile } from "../controllers/patientController.js";
+// import { authMiddleware } from "../middlewares/auth.middleware.js"; // আপনার যদি অথেন্টিকেশন মিডলওয়্যার থাকে
+
+// const router = express.Router();
+
+// router.post("/register", registerPatient);
+
+// router.get("/me", authMiddleware, getMyProfile); 
+
+// export default router;
+
 import express from "express";
-import { registerPatient, getMyProfile } from "../controllers/patientController.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js"; // আপনার যদি অথেন্টিকেশন মিডলওয়্যার থাকে
+import { registerPatient, getMyProfile, updateMyProfile } from "../controllers/patientController.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js"; // আপনার যদি অথেন্টিকেশন মিডলওয়্যার থাকে
 
 const router = express.Router();
 
 router.post("/register", registerPatient);
 
-router.get("/me", authMiddleware, getMyProfile); 
+router.get("/me", authMiddleware, getMyProfile);
+
+router.put("/me", authMiddleware, updateMyProfile); // ✅ নতুন
 
 export default router;
