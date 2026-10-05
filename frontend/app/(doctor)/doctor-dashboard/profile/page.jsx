@@ -122,7 +122,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 import { UserCircle2, Save, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -137,12 +137,14 @@ export default function DoctorProfile() {
   const loadProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/doctors/me/profile", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (!token || token === "null" || token === "undefined") {
+        setLoading(false);
+        return;
+      }
+      const res = await api.get("/doctors/me/profile");
       setForm(res.data.doctor);
     } catch (err) {
-      console.error(err);
+      console.warn("Doctor profile load error:", err?.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -161,6 +163,10 @@ export default function DoctorProfile() {
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
+      if (!token || token === "null" || token === "undefined") {
+        alert("Please login again");
+        return;
+      }
 
       // ডাটা পাঠানোর আগে ফরম্যাট ঠিক করা
       const payload = {
@@ -172,16 +178,11 @@ export default function DoctorProfile() {
         consultationFee: Number(form.consultationFee) || 0,
       };
 
-      await axios.put(`http://localhost:5000/api/doctors/${form._id}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
+      await api.put(`/doctors/${form._id}`, payload);
       alert("Profile updated successfully!");
     } catch (err) {
-      console.error("UPDATE ERROR:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to update profile. Check console for details.");
+      console.warn("UPDATE ERROR:", err?.response?.data || err.message);
+      alert(err?.response?.data?.message || "Failed to update profile.");
     } finally {
       setSaving(false);
     }

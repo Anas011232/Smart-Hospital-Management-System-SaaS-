@@ -1,18 +1,17 @@
 import {
   ListOrdered, LayoutDashboard, FileSignature,
   FolderOpen, Siren, BarChart3, CalendarClock,
-  Bot, Pill,
+  Pill,
 } from "lucide-react";
 
 const FEATURES = [
   { icon: ListOrdered,    title: "Live Queue System",       desc: "Real-time patient queue with dynamic priority management and wait time estimates.", color: "cyan" },
   { icon: LayoutDashboard,title: "Doctor Dashboard",        desc: "Personalized daily schedule, patient overview, and department metrics at a glance.", color: "blue" },
-  { icon: FileSignature,  title: "Digital Prescriptions",  desc: "E-prescriptions with drug interaction alerts, templates, and pharmacy integration.", color: "violet" },
+  { icon: FileSignature,  title: "Digital Prescriptions",  desc: "E-prescriptions with interaction alerts, templates, and pharmacy integration.", color: "violet" },
   { icon: FolderOpen,     title: "Patient Records",         desc: "Unified EMR with full history, lab results, imaging, and visit notes in one place.", color: "emerald" },
-  { icon: Siren,          title: "Emergency System",        desc: "Priority triage routing, emergency bed allocation, and instant staff notification.", color: "rose" },
+  { icon: Siren,          title: "Emergency System",        desc: "Priority routing, emergency bed allocation, and instant staff notification.", color: "rose" },
   { icon: BarChart3,      title: "Analytics Dashboard",    desc: "Hospital-wide KPIs, revenue reports, occupancy rates, and clinical outcomes.", color: "amber" },
-  { icon: CalendarClock,  title: "Smart Scheduling",       desc: "AI-assisted appointment booking with conflict detection and automated reminders.", color: "cyan" },
-  { icon: Bot,            title: "AI Assistant",            desc: "Integrated AI for clinical decision support, triage pre-screening, and documentation.", color: "violet" },
+  { icon: CalendarClock,  title: "Smart Scheduling",       desc: "Automated appointment booking with conflict detection and reminders.", color: "cyan" },
   { icon: Pill,           title: "Pharmacy Module",         desc: "Inventory tracking, dispensing workflow, and automatic reorder alerts built in.", color: "blue" },
 ];
 

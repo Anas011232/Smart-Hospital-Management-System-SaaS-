@@ -17,9 +17,18 @@ import jwt from "jsonwebtoken";
 
 export const authMiddleware = (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        message: "No token provided",
+      });
+    }
 
-    if (!token) {
+    const parts = authHeader.split(" ");
+    const token = parts.length === 2 && parts[0] === "Bearer" ? parts[1] : null;
+
+    if (!token || token === "null" || token === "undefined" || token === "false") {
       return res.status(401).json({
         success: false,
         message: "No token provided",

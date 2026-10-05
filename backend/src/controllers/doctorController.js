@@ -212,9 +212,15 @@ export const createDoctor = async (req, res) => {
 
     console.log("BODY =", req.body);
 
-    const { hospitalId } = req.body;
+    let targetHospitalId = req.body.hospitalId;
 
-    if (!hospitalId || !ObjectId.isValid(hospitalId)) {
+    if (!targetHospitalId || !ObjectId.isValid(targetHospitalId)) {
+      if (req.user && (req.user._id || req.user.id || req.user.hospitalId)) {
+        targetHospitalId = req.user._id || req.user.id || req.user.hospitalId;
+      }
+    }
+
+    if (!targetHospitalId || !ObjectId.isValid(targetHospitalId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid or missing hospitalId",
@@ -222,7 +228,7 @@ export const createDoctor = async (req, res) => {
     }
 
     const doctor = {
-      hospitalId: new ObjectId(hospitalId),
+      hospitalId: new ObjectId(targetHospitalId),
 
       fullName: safeString(req.body.fullName),
 

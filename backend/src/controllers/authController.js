@@ -49,6 +49,21 @@ export const login = async (req, res) => {
     const user = await collection.findOne({ email });
 
     if (!user) {
+      const inHospital = await db.collection("hospitals").findOne({ email });
+      const inPatient = await db.collection("patients").findOne({ email });
+      const inDoctor = await db.collection("doctors").findOne({ email });
+
+      let suggestedRole = null;
+      if (inHospital) suggestedRole = "Hospital";
+      else if (inPatient) suggestedRole = "Patient";
+      else if (inDoctor) suggestedRole = "Doctor";
+
+      if (suggestedRole) {
+        return res.status(404).json({
+          message: `User not found under role '${role}'. Please select Role: '${suggestedRole}' in the login form.`,
+        });
+      }
+
       return res.status(404).json({
         message: "User not found",
       });
@@ -58,14 +73,17 @@ export const login = async (req, res) => {
 
     let match = false;
 
-    // doctor password plain text hole
-    if (role === "doctor") {
-      match = password === user.password;
+    if (user.password && (user.password.startsWith("$2b$") || user.password.startsWith("$2a$"))) {
+      match = await bcrypt.compare(password, user.password);
     } else {
-      match = await bcrypt.compare(
-        password,
-        user.password
-      );
+      match = (password === user.password);
+      if (!match && user.password) {
+        try {
+          match = await bcrypt.compare(password, user.password);
+        } catch (e) {
+          match = false;
+        }
+      }
     }
 
     if (!match) {

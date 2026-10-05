@@ -243,18 +243,27 @@ export default function Dashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("user");
+    localStorage.removeItem("hospitalId");
 
     router.push("/login");
   };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    if (!token || token === "null" || token === "undefined") {
+      setLoading(false);
+      return;
+    }
     api
-      .get("/hospital/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get("/hospital/me")
       .then((res) => {
         setHospital(res.data.hospital);
+        if (res.data.hospital?._id) {
+          localStorage.setItem("hospitalId", res.data.hospital._id);
+        }
+      })
+      .catch((err) => {
+        console.warn("Hospital me error:", err?.response?.data?.message || err.message);
       })
       .finally(() => setLoading(false));
   }, []);

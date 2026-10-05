@@ -10,29 +10,7 @@
 // import hospitalRoutes from "./routes/hospitalRoutes.js";
 // import patientRoutes from "./routes/patientRoutes.js";
 // import doctorRoutes from "./routes/doctorRoutes.js";
-// import aiRoutes from "./routes/aiRoutes.js";
 // import appointmentRoutes from "./routes/appointmentRoutes.js";
-// import { startSession, nextPatient, toggleBreak, getActiveSession } from "./controllers/doctorSessionController.js";
-// import { authMiddleware } from "./middlewares/auth.middleware.js";
-
-// connectDB();
-
-// const app = express();
-
-// app.use(cors());
-// app.use(express.json());
-
-// app.use("/uploads", express.static("uploads"));
-
-// app.use("/api/auth", authRoutes);
-// app.use("/api/hospital", hospitalRoutes);
-// app.use("/api/patient", patientRoutes);
-// app.use("/api/doctors", doctorRoutes);
-
-// // AI ROUTE
-// app.use("/api/ai", aiRoutes);
-
-// app.use("/api/appointments", appointmentRoutes);
 
 // router.post("/start", authMiddleware, startSession);
 // router.post("/next", authMiddleware, nextPatient);
@@ -61,12 +39,12 @@ import authRoutes from "./routes/authRoutes.js";
 import hospitalRoutes from "./routes/hospitalRoutes.js";
 import patientRoutes from "./routes/patientRoutes.js";
 import doctorRoutes from "./routes/doctorRoutes.js";
-import aiRoutes from "./routes/aiRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import doctorSessionRoutes from "./routes/doctorSessionRoutes.js"; // নতুন রাউট ফাইলটি ইমপোর্ট করুন
 import prescriptionRoutes from "./routes/prescriptionRoutes.js"; // এটিও তৈরি করবেন
 import medicineRoutes from "./routes/medicineRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 connectDB();
 
 const app = express();
@@ -77,7 +55,7 @@ initSocket(server);
 
 // server.js এ এটি আপডেট করুন
 app.use(cors({
-  origin: "http://localhost:3000", // আপনার ফ্রন্টএন্ডের ইউআরএল
+  origin: process.env.CLIENT_URL || "http://localhost:3000", // আপনার ফ্রন্টএন্ডের ইউআরএল
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"] // এই লাইনটি না থাকলে টোকেন হেডার ড্রপ হয়ে যায়
@@ -90,8 +68,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/hospital", hospitalRoutes);
 app.use("/api/patient", patientRoutes);
 app.use("/api/doctors", doctorRoutes);
-app.use("/api/ai", aiRoutes);
 app.use("/api/appointments", appointmentRoutes);
+app.use("/api/admin", adminRoutes);
 
 // নতুন সেশন এবং প্রেসক্রিপশন রাউটস এখানে ব্যবহার করুন
 app.use("/api/session", doctorSessionRoutes);

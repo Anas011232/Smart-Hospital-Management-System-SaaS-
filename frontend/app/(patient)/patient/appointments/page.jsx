@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 import AppointmentModal from "../../../../components/patient/AppointmentModal.jsx";
 
 export default function MyAppointments() {
@@ -11,11 +11,13 @@ export default function MyAppointments() {
     const fetchAppointments = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/appointments/my-appointments", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setAppointments(res.data.appointments);
-      } catch (err) { console.error(err); }
+        if (!token || token === "null" || token === "undefined") return;
+
+        const res = await api.get("/appointments/my-appointments");
+        setAppointments(res.data.appointments || []);
+      } catch (err) {
+        console.warn("Appointments fetch error:", err?.response?.data?.message || err.message);
+      }
     };
     fetchAppointments();
   }, []);

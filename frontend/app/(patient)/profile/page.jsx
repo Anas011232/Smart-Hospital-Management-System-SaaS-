@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 
 export default function PatientProfile() {
   const [patient, setPatient] = useState(null);
@@ -9,12 +9,12 @@ export default function PatientProfile() {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/patient/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (!token || token === "null" || token === "undefined") return;
+
+        const res = await api.get("/patient/me");
         setPatient(res.data.patient);
       } catch (err) {
-        console.error(err);
+        console.warn("Patient profile fetch:", err?.response?.data?.message || err.message);
       }
     };
     fetchProfile();

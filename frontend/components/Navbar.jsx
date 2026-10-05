@@ -84,16 +84,6 @@ export default function Navbar() {
             >
               Get Started
             </button>
-            <button
-              onClick={() => router.push("/ai-doctor")}
-              className="px-4 py-2 text-sm font-semibold rounded-xl
-                bg-gradient-to-r from-violet-600 to-cyan-500 text-white
-                hover:from-violet-500 hover:to-cyan-400 hover:scale-105
-                shadow-lg shadow-violet-500/20 transition-all duration-200
-                flex items-center gap-1.5"
-            >
-              <span>✦</span> AI Assistant
-            </button>
           </div>
 
           {/* mobile toggle */}
@@ -142,14 +132,6 @@ export default function Navbar() {
                 hover:from-cyan-400 hover:to-blue-500 transition-all duration-200"
             >
               Get Started
-            </button>
-            <button
-              onClick={() => router.push("/ai-doctor")}
-              className="w-full py-3 text-sm font-semibold rounded-xl
-                bg-gradient-to-r from-violet-600 to-cyan-500 text-white
-                hover:from-violet-500 hover:to-cyan-400 transition-all duration-200"
-            >
-              ✦ AI Assistant
             </button>
           </div>
         </div>

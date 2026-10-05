@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 import Link from "next/link";
 
 // ── Skeleton card ──────────────────────────────────────────────────────────────
@@ -140,17 +140,15 @@ export default function Doctors() {
   const loadDoctors = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) { console.error("No token found"); setLoading(false); return; }
+      if (!token || token === "null" || token === "undefined") {
+        setLoading(false);
+        return;
+      }
 
-      const res = await axios.get("http://localhost:5000/api/doctors/my-doctors", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      console.log("DOCTORS =", res.data);
+      const res = await api.get("/doctors/my-doctors");
       setDoctors(res.data.doctors || []);
     } catch (err) {
-      console.error("LOAD ERROR:", err);
-      if (err.response) { console.log("STATUS:", err.response.status); console.log("DATA:", err.response.data); }
+      console.warn("LOAD ERROR:", err?.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -159,19 +157,18 @@ export default function Doctors() {
   const deleteDoctor = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) { alert("Please login again"); return; }
+      if (!token || token === "null" || token === "undefined") {
+        alert("Please login again");
+        return;
+      }
 
       const confirmDelete = window.confirm("Are you sure you want to delete this doctor?");
       if (!confirmDelete) return;
 
-      await axios.delete(`http://localhost:5000/api/doctors/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      await api.delete(`/doctors/${id}`);
       setDoctors((prev) => prev.filter((doctor) => doctor._id !== id));
     } catch (err) {
-      console.error("DELETE ERROR:", err);
-      if (err.response) { console.log(err.response.data); }
+      console.warn("DELETE ERROR:", err?.response?.data?.message || err.message);
     }
   };
 

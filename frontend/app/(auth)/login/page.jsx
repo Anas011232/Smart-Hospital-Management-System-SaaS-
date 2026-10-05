@@ -307,8 +307,11 @@ export default function Login() {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-
       if (data.user?.role === "hospital") {
+        const hId = data.user._id || data.user.id || data.user.hospitalId;
+        if (hId) {
+          localStorage.setItem("hospitalId", hId);
+        }
         window.location.href = "/hospital/dashboard";
         return;
       }

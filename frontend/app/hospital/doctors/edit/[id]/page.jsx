@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 import { useParams, useRouter } from "next/navigation";
 
 export default function EditDoctor() {
@@ -18,12 +18,10 @@ export default function EditDoctor() {
   // =====================
   const loadDoctor = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/doctors/${id}`
-      );
+      const res = await api.get(`/doctors/${id}`);
       setForm(res.data.doctor);
     } catch (err) {
-      console.error(err);
+      console.warn("Load doctor error:", err?.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -68,8 +66,8 @@ export default function EditDoctor() {
         data.append("photo", image);
       }
 
-      await axios.put(
-        `http://localhost:5000/api/doctors/${id}`,
+      await api.put(
+        `/doctors/${id}`,
         data,
         {
           headers: {
@@ -80,7 +78,7 @@ export default function EditDoctor() {
 
       router.push("/hospital/doctors");
     } catch (err) {
-      console.error("UPDATE ERROR:", err);
+      console.warn("UPDATE ERROR:", err?.response?.data?.message || err.message);
     }
   };
 

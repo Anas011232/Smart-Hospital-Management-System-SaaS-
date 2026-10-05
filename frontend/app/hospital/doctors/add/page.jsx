@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 import { useRouter } from "next/navigation";
 
 // ─── Section config for grouping fields ───────────────────────────────────────
@@ -233,16 +233,29 @@ export default function AddDoctor() {
   // ── section navigation ──
   
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const hospitalId = localStorage.getItem("hospitalId");
+    try {
+      let hospitalId = localStorage.getItem("hospitalId");
 
-    if (!hospitalId) {
-      alert("Hospital ID missing");
-      return;
-    }
+      if (!hospitalId || hospitalId === "null" || hospitalId === "undefined") {
+        try {
+          const userStr = localStorage.getItem("user");
+          if (userStr) {
+            const userObj = JSON.parse(userStr);
+            hospitalId = userObj._id || userObj.id || userObj.hospitalId;
+            if (hospitalId) {
+              localStorage.setItem("hospitalId", hospitalId);
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!hospitalId || hospitalId === "null" || hospitalId === "undefined") {
+        alert("Hospital session missing. Please log in again.");
+        return;
+      }
 
     const data = new FormData();
 
@@ -256,8 +269,8 @@ export default function AddDoctor() {
       data.append("photo", image);
     }
 
-    const res = await axios.post(
-      "http://localhost:5000/api/doctors",
+    const res = await api.post(
+      "/doctors",
       data,
       {
         headers: {
