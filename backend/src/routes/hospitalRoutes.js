@@ -4,6 +4,7 @@ import {
   registerHospital,
   getAllHospitals,
   getMyHospital,
+  updateMyHospital,
 } from "../controllers/hospitalController.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -22,6 +23,13 @@ router.get(
   "/me",
   authMiddleware,
   getMyHospital
+);
+
+router.put(
+  "/me",
+  authMiddleware,
+  upload.single("image"),
+  updateMyHospital
 );
 
 export default router;

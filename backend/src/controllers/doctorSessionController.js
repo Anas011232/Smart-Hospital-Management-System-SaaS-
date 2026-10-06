@@ -58,31 +58,127 @@ export const startSession = async (req, res) => {
   }
 };
 
-// ২. নেক্সট পেশেন্ট কল করা
+// ২. নেক্সট পেশেন্ট কল করা (কন্ট্রোলড কিউ সীমা সহ)
 export const nextPatient = async (req, res) => {
   try {
     const db = getDB();
     const doctorId = req.user.id;
     const { sessionId } = req.body;
 
-    const session = await db.collection("doctor_sessions").findOne({ _id: new ObjectId(sessionId) });
-    if (!session) return res.status(404).json({ success: false, message: "Session not found" });
+    if (!sessionId || !ObjectId.isValid(sessionId)) {
+      return res.status(400).json({ success: false, message: "Valid Session ID required" });
+    }
+
+    const session = await db.collection("doctor_sessions").findOne({
+      _id: new ObjectId(sessionId),
+      doctorId: new ObjectId(doctorId),
+    });
+
+    if (!session) {
+      return res.status(404).json({ success: false, message: "Session not found" });
+    }
+
+    if (session.status !== "active") {
+      return res.json({
+        success: true,
+        sessionEnded: true,
+        message: "Session is already completed.",
+      });
+    }
+
+    const appointmentDate = session.appointmentDate;
+
+    // ঐ দিনের সব 'accepted' অ্যাপয়েন্টমেন্টের লিস্ট এবং ম্যাক্সিমাম সিরিয়াল বের করা
+    const acceptedAppointments = await db
+      .collection("appointments")
+      .find({
+        doctorId: new ObjectId(doctorId),
+        "patientInfo.appointmentDate": appointmentDate,
+        status: "accepted",
+      })
+      .sort({ serialNumber: 1 })
+      .toArray();
+
+    let maxSerial = 0;
+    if (acceptedAppointments.length > 0) {
+      maxSerial = Math.max(...acceptedAppointments.map((a) => Number(a.serialNumber || 0)));
+    }
+
+    // যদি বর্তমান সিরিয়াল ম্যাক্সিমাম সিরিয়ালের সমান বা বেশি হয়, অথবা কোনো পেশেন্ট না থাকে
+    if (maxSerial === 0 || session.currentSerial >= maxSerial) {
+      // ওপিডি সেশন অটোমেটিক এন্ড করা
+      await db.collection("doctor_sessions").updateOne(
+        { _id: new ObjectId(sessionId) },
+        {
+          $set: {
+            status: "completed",
+            endedAt: new Date(),
+            isBreak: false,
+          },
+        }
+      );
+
+      // সকেট অ্যালার্ট পাঠানো
+      emitSessionEnded(`room_${doctorId}_${appointmentDate}`, {
+        sessionId,
+        status: "completed",
+        automatic: true,
+        timestamp: new Date(),
+      });
+      emitSessionEnded(`room_${doctorId}`, {
+        sessionId,
+        status: "completed",
+        automatic: true,
+        timestamp: new Date(),
+      });
+
+      return res.json({
+        success: true,
+        sessionEnded: true,
+        message: "Queue completed! All patients seen. OPD session has been ended automatically.",
+      });
+    }
 
     const nextSerial = session.currentSerial + 1;
 
+    // সেশন কারেন্ট সিরিয়াল আপডেট করা
     await db.collection("doctor_sessions").updateOne(
       { _id: new ObjectId(sessionId) },
       { $set: { currentSerial: nextSerial, isBreak: false, breakReason: "" } }
     );
 
+    // পূর্বের সিরিয়ালের পেশেন্টকে কমপ্লিট বা কনসাল্টেশনে আপডেট করা
+    await db.collection("appointments").updateOne(
+      {
+        doctorId: new ObjectId(doctorId),
+        "patientInfo.appointmentDate": appointmentDate,
+        serialNumber: nextSerial,
+        status: "accepted",
+      },
+      {
+        $set: {
+          consultationStatus: "in_consultation",
+          updatedAt: new Date(),
+        },
+      }
+    );
+
     // EMIT WITH DATE-BASED ROOM
-    emitQueueUpdate(`room_${doctorId}_${session.appointmentDate}`, { currentSerial: nextSerial, isBreak: false, breakReason: "" });
+    emitQueueUpdate(`room_${doctorId}_${appointmentDate}`, {
+      currentSerial: nextSerial,
+      isBreak: false,
+      breakReason: "",
+    });
 
-    // Check auto-end after advancing
-    await checkSessionAutoEnd(sessionId, session.appointmentDate, doctorId);
-
-    res.json({ success: true, message: "Moved to next patient", currentSerial: nextSerial });
+    res.json({
+      success: true,
+      sessionEnded: false,
+      message: `Calling next patient #${nextSerial}`,
+      currentSerial: nextSerial,
+      maxSerial,
+    });
   } catch (err) {
+    console.error("NEXT PATIENT ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

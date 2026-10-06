@@ -11,7 +11,7 @@ import {
   toggleVerifyDoctor,
   toggleBlockDoctor,
   getPatients,
-  toggleBlockPatient,
+  deletePatient,
   getSystemHealth,
   getRevenueByDateRange,
 } from "../controllers/adminController.js";
@@ -40,7 +40,7 @@ router.patch("/doctors/:id/block", toggleBlockDoctor);
 
 // ================= PATIENTS MANAGEMENT =================
 router.get("/patients", getPatients);
-router.patch("/patients/:id/block", toggleBlockPatient);
+router.delete("/patients/:id", deletePatient);
 
 // ================= SYSTEM HEALTH =================
 router.get("/system-health", getSystemHealth);

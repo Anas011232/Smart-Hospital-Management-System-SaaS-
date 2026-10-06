@@ -42,6 +42,78 @@ export const getMyHospital = async (req, res) => {
   }
 };
 
+export const updateMyHospital = async (req, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const db = getDB();
+    const hospitalId = new ObjectId(req.user.id);
+
+    const existing = await db.collection("hospitals").findOne({ _id: hospitalId });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Hospital not found" });
+    }
+
+    const {
+      hospitalName,
+      ownerName,
+      phone,
+      emergencyPhone,
+      website,
+      address,
+      city,
+      state,
+      postalCode,
+      country,
+      hospitalType,
+      licenseNumber,
+      establishedYear,
+      totalBeds,
+    } = req.body;
+
+    const updateFields = {
+      hospitalName: hospitalName ?? existing.hospitalName,
+      slug: hospitalName ? slugify(hospitalName) : existing.slug,
+      ownerName: ownerName ?? existing.ownerName,
+      phone: phone ?? existing.phone,
+      emergencyPhone: emergencyPhone ?? existing.emergencyPhone,
+      website: website ?? existing.website,
+      address: address ?? existing.address,
+      city: city ?? existing.city,
+      state: state ?? existing.state,
+      postalCode: postalCode ?? existing.postalCode,
+      country: country ?? existing.country,
+      hospitalType: hospitalType ?? existing.hospitalType,
+      licenseNumber: licenseNumber ?? existing.licenseNumber,
+      establishedYear: establishedYear ? Number(establishedYear) : existing.establishedYear,
+      totalBeds: totalBeds !== undefined ? Number(totalBeds) : existing.totalBeds,
+      updatedAt: new Date(),
+    };
+
+    if (req.file) {
+      updateFields.hospitalImage = req.file.path;
+    }
+
+    await db.collection("hospitals").updateOne(
+      { _id: hospitalId },
+      { $set: updateFields }
+    );
+
+    const updatedHospital = await db.collection("hospitals").findOne({ _id: hospitalId });
+
+    res.json({
+      success: true,
+      message: "Hospital profile updated successfully",
+      hospital: updatedHospital,
+    });
+  } catch (err) {
+    console.error("UPDATE MY HOSPITAL ERROR:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export const registerHospital = async (req, res) => {
   try {
     const db = await getDB();
@@ -136,7 +208,8 @@ export const getAllHospitals = async (req, res) => {
   try {
     const db = getDB();
 
-    const hospitals = await db.collection("hospitals").find().toArray();
+    // Only return verified hospitals to patients/public search
+    const hospitals = await db.collection("hospitals").find({ isVerified: true }).toArray();
 
     res.json({
       success: true,

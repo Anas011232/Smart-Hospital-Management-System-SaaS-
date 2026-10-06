@@ -4,10 +4,10 @@ import { useState } from "react";
 import {
   Search,
   Users,
-  Lock,
-  Unlock,
+  Trash2,
   ChevronLeft,
   ChevronRight,
+  CheckCircle2,
 } from "lucide-react";
 
 export default function PatientsTab({
@@ -18,7 +18,7 @@ export default function PatientsTab({
   onPageChange,
   searchQuery,
   setSearchQuery,
-  onBlockPatient,
+  onDeletePatient,
   loading,
 }) {
   return (
@@ -57,12 +57,11 @@ export default function PatientsTab({
             <table className="w-full text-left text-xs text-slate-300 table-fixed border-collapse">
               <thead className="bg-slate-950/90 text-slate-400 uppercase font-semibold border-b border-slate-800 text-[11px]">
                 <tr>
-                  <th className="py-3.5 px-3 w-[28%]">Patient & Email</th>
-                  <th className="py-3.5 px-2 w-[16%]">Phone Number</th>
-                  <th className="py-3.5 px-2 w-[10%]">Blood Group</th>
-                  <th className="py-3.5 px-2 w-[20%]">Emergency Contact</th>
-                  <th className="py-3.5 px-2 w-[12%]">Reg Date</th>
-                  <th className="py-3.5 px-2 w-[10%]">Status</th>
+                  <th className="py-3.5 px-3 w-[30%]">Patient & Email</th>
+                  <th className="py-3.5 px-2 w-[18%]">Phone Number</th>
+                  <th className="py-3.5 px-2 w-[12%]">Blood Group</th>
+                  <th className="py-3.5 px-2 w-[22%]">Emergency Contact</th>
+                  <th className="py-3.5 px-2 w-[14%]">Reg Date</th>
                   <th className="py-3.5 px-3 w-[14%] text-right">Action</th>
                 </tr>
               </thead>
@@ -119,30 +118,14 @@ export default function PatientsTab({
                       {/* Created Date */}
                       <td className="py-3 px-2 text-slate-400 text-xs truncate">{regDate}</td>
 
-                      {/* Status */}
-                      <td className="py-3 px-2">
-                        {p.isBlocked ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
-                            <Lock size={10} /> Blocked
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            <Unlock size={10} /> Active
-                          </span>
-                        )}
-                      </td>
-
                       {/* Actions */}
                       <td className="py-3 px-3 text-right">
                         <button
-                          onClick={() => onBlockPatient(p._id, !p.isBlocked)}
-                          className={`px-2.5 py-1 rounded-md font-semibold text-[10px] transition-all ${
-                            p.isBlocked
-                              ? "bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 border border-blue-500/30"
-                              : "bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30"
-                          }`}
+                          onClick={() => onDeletePatient(p._id, p.name)}
+                          className="px-2.5 py-1 rounded-md bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30 font-semibold text-[10px] transition-all inline-flex items-center gap-1"
+                          title="Remove Patient from Database"
                         >
-                          {p.isBlocked ? "Unblock" : "Block"}
+                          <Trash2 size={11} /> Remove
                         </button>
                       </td>
                     </tr>

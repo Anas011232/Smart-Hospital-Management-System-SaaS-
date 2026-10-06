@@ -453,9 +453,9 @@ export default function PatientRegister() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Patient Registered Successfully ✅");
+        alert("Patient Registered Successfully ✅ Please log in with your credentials.");
 
-        window.location.href = "/patient-dashboard";
+        window.location.href = "/login";
         return;
       }
 

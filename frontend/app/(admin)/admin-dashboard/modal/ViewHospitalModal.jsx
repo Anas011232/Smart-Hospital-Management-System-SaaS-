@@ -2,7 +2,7 @@
 
 import { X, Building2, ShieldCheck, ShieldAlert, Lock, Unlock, Mail, Phone, MapPin, CreditCard, ExternalLink, Calendar, User, Award } from "lucide-react";
 
-export default function ViewHospitalModal({ hospital, onClose, onVerify, onBlock }) {
+export default function ViewHospitalModal({ hospital, onClose, onVerify }) {
   if (!hospital) return null;
 
   const expires = hospital.expiresAt ? new Date(hospital.expiresAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
@@ -164,18 +164,6 @@ export default function ViewHospitalModal({ hospital, onClose, onVerify, onBlock
                 <span className="text-slate-500 text-[10px]">Expires On</span>
                 <span className="font-semibold text-amber-300">{expires}</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-slate-800">
-                <span className="text-slate-500 text-[10px]">Account Access</span>
-                {hospital.isBlocked ? (
-                  <span className="text-red-400 font-bold flex items-center gap-1">
-                    <Lock size={12} /> Blocked
-                  </span>
-                ) : (
-                  <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <Unlock size={12} /> Active Access
-                  </span>
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -193,16 +181,6 @@ export default function ViewHospitalModal({ hospital, onClose, onVerify, onBlock
               }`}
             >
               {hospital.isVerified ? "Mark Unverified" : "Verify Hospital"}
-            </button>
-            <button
-              onClick={() => onBlock(hospital._id, !hospital.isBlocked)}
-              className={`px-4 py-2 rounded-xl font-bold text-xs transition-all ${
-                hospital.isBlocked
-                  ? "bg-blue-600 text-white hover:bg-blue-500"
-                  : "bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30"
-              }`}
-            >
-              {hospital.isBlocked ? "Unblock Access" : "Block Access"}
             </button>
             <button
               onClick={onClose}

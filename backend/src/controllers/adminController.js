@@ -466,35 +466,34 @@ export const getPatients = async (req, res) => {
   }
 };
 
-export const toggleBlockPatient = async (req, res) => {
+export const deletePatient = async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
-    const { isBlocked } = req.body;
 
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Invalid patient ID" });
     }
 
-    const target = await db.collection("patients").findOne({ _id: new ObjectId(id) });
+    const patientId = new ObjectId(id);
+
+    const target = await db.collection("patients").findOne({ _id: patientId });
     if (!target) {
       return res.status(404).json({ success: false, message: "Patient not found" });
     }
 
-    const newStatus = typeof isBlocked === "boolean" ? isBlocked : !target.isBlocked;
-
-    await db.collection("patients").updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { isBlocked: newStatus, updatedAt: new Date() } }
-    );
+    // Delete patient account completely from database
+    await Promise.all([
+      db.collection("patients").deleteOne({ _id: patientId }),
+      db.collection("appointments").deleteMany({ patientId: patientId }),
+    ]);
 
     res.json({
       success: true,
-      message: `Patient account ${newStatus ? "blocked" : "unblocked"} successfully`,
-      isBlocked: newStatus,
+      message: "Patient account permanently removed from database",
     });
   } catch (err) {
-    console.error("ADMIN BLOCK PATIENT ERROR:", err);
+    console.error("ADMIN DELETE PATIENT ERROR:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

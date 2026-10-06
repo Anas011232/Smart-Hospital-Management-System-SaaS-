@@ -65,7 +65,6 @@ export default function HospitalsTab({
               <option value="all">All Verification Status</option>
               <option value="verified">Verified Only</option>
               <option value="unverified">Unverified Only</option>
-              <option value="blocked">Blocked Only</option>
             </select>
           </div>
 
@@ -97,13 +96,12 @@ export default function HospitalsTab({
             <table className="w-full text-left text-xs text-slate-300 table-fixed border-collapse">
               <thead className="bg-slate-950/90 text-slate-400 uppercase font-semibold border-b border-slate-800 text-[11px]">
                 <tr>
-                  <th className="py-3.5 px-3 w-[25%]">Hospital Info</th>
-                  <th className="py-3.5 px-2 w-[12%]">Location</th>
-                  <th className="py-3.5 px-2 w-[10%]">License #</th>
-                  <th className="py-3.5 px-2 w-[15%]">Plan & Expiration</th>
-                  <th className="py-3.5 px-2 w-[11%]">Verification</th>
-                  <th className="py-3.5 px-2 w-[9%]">Access</th>
-                  <th className="py-3.5 px-3 w-[18%] text-right">Actions</th>
+                  <th className="py-3.5 px-3 w-[28%]">Hospital Info</th>
+                  <th className="py-3.5 px-2 w-[14%]">Location</th>
+                  <th className="py-3.5 px-2 w-[12%]">License #</th>
+                  <th className="py-3.5 px-2 w-[18%]">Plan & Expiration</th>
+                  <th className="py-3.5 px-2 w-[14%]">Verification Status</th>
+                  <th className="py-3.5 px-3 w-[14%] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -177,23 +175,10 @@ export default function HospitalsTab({
                         )}
                       </td>
 
-                      {/* Account Block Status */}
-                      <td className="py-3 px-2">
-                        {h.isBlocked ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
-                            <Lock size={10} /> Blocked
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                            <Unlock size={10} /> Active
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Actions in 2 Compact Organized Rows */}
+                      {/* Actions */}
                       <td className="py-3 px-3 text-right">
                         <div className="flex flex-col items-end gap-1">
-                          {/* Row 1: View Details + Verify + Block */}
+                          {/* Row 1: View Details + Verify/Unverify */}
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => setSelectedHospitalForView(h)}
@@ -213,18 +198,6 @@ export default function HospitalsTab({
                               title={h.isVerified ? "Mark as Unverified" : "Verify Hospital"}
                             >
                               {h.isVerified ? "Unverify" : "Verify"}
-                            </button>
-
-                            <button
-                              onClick={() => onBlockHospital(h._id, !h.isBlocked)}
-                              className={`px-2 py-0.5 rounded-md font-semibold text-[10px] transition-all ${
-                                h.isBlocked
-                                  ? "bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 border border-blue-500/30"
-                                  : "bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30"
-                              }`}
-                              title={h.isBlocked ? "Unblock Access" : "Block Access"}
-                            >
-                              {h.isBlocked ? "Unblock" : "Block"}
                             </button>
                           </div>
 
@@ -290,10 +263,6 @@ export default function HospitalsTab({
           onVerify={(id, status) => {
             onVerifyHospital(id, status);
             setSelectedHospitalForView((prev) => (prev ? { ...prev, isVerified: status } : null));
-          }}
-          onBlock={(id, status) => {
-            onBlockHospital(id, status);
-            setSelectedHospitalForView((prev) => (prev ? { ...prev, isBlocked: status } : null));
           }}
         />
       )}

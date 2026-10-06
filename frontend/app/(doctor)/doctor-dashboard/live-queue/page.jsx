@@ -431,8 +431,9 @@ export default function DoctorLiveQueue() {
       });
 
       // 4. SESSION END
-      socket.on("session-ended", () => {
+      socket.on("session-ended", (data) => {
         localStorage.removeItem("active_session");
+        alert(data?.message || "Queue completed! OPD Session has ended. 🎉");
         router.push("/doctor-dashboard/sessions");
       });
     };
@@ -446,23 +447,34 @@ export default function DoctorLiveQueue() {
 
   // NEXT PATIENT
   const handleNextPatient = async () => {
-    const res = await api.post("/session/next", {
-      sessionId: session._id,
-    });
+    try {
+      const res = await api.post("/session/next", {
+        sessionId: session._id,
+      });
 
-    if (res.data.success) {
-      const updated = {
-        ...session,
-        currentSerial: res.data.currentSerial,
-        isBreak: false,
-        breakReason: "",
-      };
+      if (res.data.sessionEnded || res.data.finished) {
+        localStorage.removeItem("active_session");
+        alert(res.data.message || "Queue completed! OPD Session has ended automatically. 🎉");
+        router.push("/doctor-dashboard/sessions");
+        return;
+      }
 
-      setSession(updated);
-      localStorage.setItem(
-        "active_session",
-        JSON.stringify(updated)
-      );
+      if (res.data.success) {
+        const updated = {
+          ...session,
+          currentSerial: res.data.currentSerial,
+          isBreak: false,
+          breakReason: "",
+        };
+
+        setSession(updated);
+        localStorage.setItem(
+          "active_session",
+          JSON.stringify(updated)
+        );
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to call next patient");
     }
   };
 

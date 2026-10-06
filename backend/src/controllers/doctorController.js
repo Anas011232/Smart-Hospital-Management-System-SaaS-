@@ -227,6 +227,22 @@ export const createDoctor = async (req, res) => {
       });
     }
 
+    // Verify hospital status before adding doctor
+    const targetHospital = await db.collection("hospitals").findOne({ _id: new ObjectId(targetHospitalId) });
+    if (!targetHospital) {
+      return res.status(404).json({
+        success: false,
+        message: "Hospital not found",
+      });
+    }
+
+    if (!targetHospital.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Hospital is currently unverified. Cannot add new doctors until hospital is verified by Admin.",
+      });
+    }
+
     const doctor = {
       hospitalId: new ObjectId(targetHospitalId),
 
@@ -425,36 +441,38 @@ export const updateDoctor = async (req, res) => {
       });
     }
 
+    const parseArrayField = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val.map((s) => String(s).trim()).filter(Boolean);
+      return String(val)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    };
+
     const updateData = {
-      fullName: req.body.fullName,
-      email: req.body.email,
-      phone: req.body.phone,
-      gender: req.body.gender,
-      dateOfBirth: req.body.dateOfBirth,
-      bloodGroup: req.body.bloodGroup,
-      address: req.body.address,
-      nidNumber: req.body.nidNumber,
-      specialization: req.body.specialization,
-      designation: req.body.designation,
-      department: req.body.department,
-      qualification: req.body.qualification,
-      experienceYears: Number(req.body.experienceYears || 0),
-      medicalRegistrationNumber:
-        req.body.medicalRegistrationNumber,
-      licenseNumber: req.body.licenseNumber,
-      consultationFee: Number(req.body.consultationFee || 0),
-      availableDays: req.body.availableDays
-        ? req.body.availableDays.split(",")
-        : [],
-      startTime: req.body.startTime,
-      endTime: req.body.endTime,
-      maxPatientsPerDay: Number(
-        req.body.maxPatientsPerDay || 0
-      ),
-      bio: req.body.bio,
-      languages: req.body.languages
-        ? req.body.languages.split(",")
-        : [],
+      fullName: req.body.fullName ?? doctor.fullName,
+      email: req.body.email ?? doctor.email,
+      phone: req.body.phone ?? doctor.phone,
+      gender: req.body.gender ?? doctor.gender,
+      dateOfBirth: req.body.dateOfBirth ?? doctor.dateOfBirth,
+      bloodGroup: req.body.bloodGroup ?? doctor.bloodGroup,
+      address: req.body.address ?? doctor.address,
+      nidNumber: req.body.nidNumber ?? doctor.nidNumber,
+      specialization: req.body.specialization ?? doctor.specialization,
+      designation: req.body.designation ?? doctor.designation,
+      department: req.body.department ?? doctor.department,
+      qualification: req.body.qualification ?? doctor.qualification,
+      experienceYears: Number(req.body.experienceYears ?? doctor.experienceYears ?? 0),
+      medicalRegistrationNumber: req.body.medicalRegistrationNumber ?? doctor.medicalRegistrationNumber,
+      licenseNumber: req.body.licenseNumber ?? doctor.licenseNumber,
+      consultationFee: Number(req.body.consultationFee ?? doctor.consultationFee ?? 0),
+      availableDays: req.body.availableDays !== undefined ? parseArrayField(req.body.availableDays) : (doctor.availableDays || []),
+      startTime: req.body.startTime ?? doctor.startTime ?? "",
+      endTime: req.body.endTime ?? doctor.endTime ?? "",
+      maxPatientsPerDay: Number(req.body.maxPatientsPerDay ?? doctor.maxPatientsPerDay ?? 0),
+      bio: req.body.bio ?? doctor.bio ?? "",
+      languages: req.body.languages !== undefined ? parseArrayField(req.body.languages) : (doctor.languages || []),
       updatedAt: new Date(),
     };
 

@@ -177,47 +177,15 @@ export default function DoctorsTab({
                       )}
                     </td>
 
-                    {/* Actions in 2 Compact Organized Rows */}
+                    {/* Actions */}
                     <td className="py-3 px-3 text-right">
-                      <div className="flex flex-col items-end gap-1">
-                        {/* Row 1: View Details + Verify */}
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => setSelectedDoctorForView(d)}
-                            className="px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 border border-cyan-500/30 font-semibold text-[10px] transition-all inline-flex items-center gap-1"
-                            title="View Full Doctor Details"
-                          >
-                            <Eye size={11} /> Details
-                          </button>
-
-                          <button
-                            onClick={() => onVerifyDoctor(d._id, !d.isVerified)}
-                            className={`px-2 py-0.5 rounded-md font-semibold text-[10px] transition-all ${
-                              d.isVerified
-                                ? "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
-                                : "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30"
-                            }`}
-                            title={d.isVerified ? "Mark License Unverified" : "Verify License"}
-                          >
-                            {d.isVerified ? "Unverify" : "Verify"}
-                          </button>
-                        </div>
-
-                        {/* Row 2: Activate / Deactivate */}
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => onBlockDoctor(d._id, !d.isActive)}
-                            className={`px-2 py-0.5 rounded-md font-semibold text-[10px] transition-all ${
-                              d.isActive !== false
-                                ? "bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/30"
-                                : "bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 border border-blue-500/30"
-                            }`}
-                            title={d.isActive !== false ? "Deactivate Account" : "Activate Account"}
-                          >
-                            {d.isActive !== false ? "Deactivate" : "Activate"}
-                          </button>
-                        </div>
-                      </div>
+                      <button
+                        onClick={() => setSelectedDoctorForView(d)}
+                        className="px-2.5 py-1 rounded-md bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 border border-cyan-500/30 font-semibold text-[10px] transition-all inline-flex items-center gap-1"
+                        title="View Full Doctor Details"
+                      >
+                        <Eye size={11} /> Details
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -257,14 +225,6 @@ export default function DoctorsTab({
         <ViewDoctorModal
           doctor={selectedDoctorForView}
           onClose={() => setSelectedDoctorForView(null)}
-          onVerify={(id, status) => {
-            onVerifyDoctor(id, status);
-            setSelectedDoctorForView((prev) => (prev ? { ...prev, isVerified: status } : null));
-          }}
-          onBlock={(id, status) => {
-            onBlockDoctor(id, status);
-            setSelectedDoctorForView((prev) => (prev ? { ...prev, isActive: status } : null));
-          }}
         />
       )}
     </div>

@@ -289,15 +289,19 @@ export default function AdminDashboard() {
   };
 
   // Patient Actions
-  const handleBlockPatient = async (id, isBlocked) => {
+  const handleDeletePatient = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to remove patient "${name || 'this patient'}"? This will permanently delete the patient from the database and prevent login.`)) {
+      return;
+    }
     try {
-      const res = await api.patch(`/admin/patients/${id}/block`, { isBlocked });
+      const res = await api.delete(`/admin/patients/${id}`);
       if (res.data.success) {
         showToast(res.data.message);
         fetchPatients();
+        fetchStats();
       }
     } catch (err) {
-      showToast(err?.response?.data?.message || "Failed to update patient status", "error");
+      showToast(err?.response?.data?.message || "Failed to remove patient", "error");
     }
   };
 
@@ -411,7 +415,7 @@ export default function AdminDashboard() {
             onPageChange={setPatientPage}
             searchQuery={patientSearch}
             setSearchQuery={setPatientSearch}
-            onBlockPatient={handleBlockPatient}
+            onDeletePatient={handleDeletePatient}
             loading={loadingTab}
           />
         )}

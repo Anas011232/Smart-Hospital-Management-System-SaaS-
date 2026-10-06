@@ -1,24 +1,97 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { FiCalendar, FiClock, FiCheckCircle, FiActivity, FiTrendingUp, FiAlertCircle } from "react-icons/fi";
+import api from "@/lib/axios";
+import { FiCalendar, FiClock, FiCheckCircle, FiActivity, FiTrendingUp, FiInbox } from "react-icons/fi";
 
 export default function PatientDashboard() {
-  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState([]);
+  const [activities, setActivities] = useState([]);
 
-  // useEffect(() => {
-  //   setData({
-  //     totalAppointments: 5,
-  //     upcoming: 2,
-  //     completed: 3,
-  //   });
-  // }, []);
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      try {
+        setLoading(true);
+
+        const [appRes, prescRes] = await Promise.all([
+          api.get("/appointments/my-appointments").catch(() => null),
+          api.get("/prescriptions/my-prescriptions").catch(() => null),
+        ]);
+
+        const appList = appRes?.data?.appointments || [];
+        const prescList = prescRes?.data?.prescriptions || [];
+
+        setAppointments(appList);
+
+        // Build recent activities list
+        const activityList = [];
+
+        appList.forEach((app) => {
+          const docName = app.doctorDetails?.fullName || "Doctor";
+          const dateStr = app.patientInfo?.appointmentDate || app.createdAt;
+          const displayDate = dateStr ? new Date(dateStr).toLocaleDateString() : "Recently";
+
+          if (app.status === "completed" || app.consultationStatus === "completed") {
+            activityList.push({
+              label: `Completed consultation with ${docName}`,
+              time: displayDate,
+              color: "bg-emerald-400",
+              timestamp: new Date(app.updatedAt || app.createdAt || Date.now()).getTime(),
+            });
+          } else if (app.status === "cancelled" || app.status === "rejected") {
+            activityList.push({
+              label: `Appointment ${app.status} with ${docName}`,
+              time: displayDate,
+              color: "bg-red-400",
+              timestamp: new Date(app.updatedAt || app.createdAt || Date.now()).getTime(),
+            });
+          } else {
+            activityList.push({
+              label: `Booked appointment with ${docName}`,
+              time: displayDate,
+              color: "bg-blue-400",
+              timestamp: new Date(app.createdAt || Date.now()).getTime(),
+            });
+          }
+        });
+
+        prescList.forEach((presc) => {
+          const docName = presc.doctorName || "Doctor";
+          const displayDate = presc.createdAt ? new Date(presc.createdAt).toLocaleDateString() : "Recently";
+          activityList.push({
+            label: `Prescription issued by ${docName}`,
+            time: displayDate,
+            color: "bg-violet-400",
+            timestamp: new Date(presc.createdAt || Date.now()).getTime(),
+          });
+        });
+
+        // Sort descending by timestamp
+        activityList.sort((a, b) => b.timestamp - a.timestamp);
+        setActivities(activityList.slice(0, 5));
+      } catch (err) {
+        console.error("Fetch patient dashboard data error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatientData();
+  }, []);
+
+  const totalCount = appointments.length;
+  const completedCount = appointments.filter(
+    (a) => a.status === "completed" || a.consultationStatus === "completed"
+  ).length;
+  const upcomingCount = appointments.filter(
+    (a) => a.status !== "completed" && a.consultationStatus !== "completed" && a.status !== "cancelled" && a.status !== "rejected"
+  ).length;
 
   const stats = [
     {
       label: "Total Appointments",
-      value: data?.totalAppointments ?? "—",
+      value: loading ? "..." : totalCount,
       icon: FiCalendar,
       color: "blue",
       gradient: "from-blue-500/20 to-blue-600/5",
@@ -29,7 +102,7 @@ export default function PatientDashboard() {
     },
     {
       label: "Upcoming",
-      value: data?.upcoming ?? "—",
+      value: loading ? "..." : upcomingCount,
       icon: FiClock,
       color: "violet",
       gradient: "from-violet-500/20 to-violet-600/5",
@@ -40,7 +113,7 @@ export default function PatientDashboard() {
     },
     {
       label: "Completed",
-      value: data?.completed ?? "—",
+      value: loading ? "..." : completedCount,
       icon: FiCheckCircle,
       color: "emerald",
       gradient: "from-emerald-500/20 to-emerald-600/5",
@@ -92,7 +165,7 @@ export default function PatientDashboard() {
 
       {/* Secondary Info Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Activity Feed Placeholder */}
+        {/* Real Activity Feed */}
         <div className="rounded-2xl border border-slate-700/50 bg-slate-900/60 backdrop-blur-sm p-6">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
@@ -100,19 +173,28 @@ export default function PatientDashboard() {
             </div>
             <h2 className="text-sm font-semibold text-white">Recent Activity</h2>
           </div>
-          <div className="space-y-3">
-            {[
-              { label: "Appointment booked", time: "2h ago", color: "bg-blue-400" },
-              { label: "Prescription issued", time: "Yesterday", color: "bg-violet-400" },
-              { label: "Consultation completed", time: "3 days ago", color: "bg-emerald-400" },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-800 last:border-0">
-                <span className={`w-2 h-2 rounded-full ${item.color} flex-shrink-0`} />
-                <span className="text-sm text-slate-300 flex-1">{item.label}</span>
-                <span className="text-xs text-slate-500">{item.time}</span>
-              </div>
-            ))}
-          </div>
+
+          {loading ? (
+            <p className="text-xs text-slate-500 py-6 text-center">Loading activity feed...</p>
+          ) : activities.length === 0 ? (
+            <div className="py-8 text-center text-slate-500 space-y-2">
+              <FiInbox size={32} className="mx-auto text-slate-600 mb-1" />
+              <p className="text-xs font-semibold text-slate-400">No recent activity recorded yet.</p>
+              <p className="text-[11px] text-slate-500">Book an appointment or visit a doctor to see your updates here.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {activities.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 py-2 border-b border-slate-800 last:border-0">
+                  <span className={`w-2 h-2 rounded-full ${item.color} flex-shrink-0`} />
+                  <span className="text-sm text-slate-300 flex-1 truncate" title={item.label}>
+                    {item.label}
+                  </span>
+                  <span className="text-xs text-slate-500 flex-shrink-0">{item.time}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Quick Actions */}

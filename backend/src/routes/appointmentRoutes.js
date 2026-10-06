@@ -14,11 +14,15 @@ import {
   startConsultation,
   finishConsultation,
   cancelAppointment,
+  checkDoctorDateAvailability,
 } from "../controllers/appointmentController.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
+
+// Check availability for a date
+router.get("/check-availability/:doctorId", checkDoctorDateAvailability);
 
 // Create appointment
 router.post("/", authMiddleware, createAppointment);

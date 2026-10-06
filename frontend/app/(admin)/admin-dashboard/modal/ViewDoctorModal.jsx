@@ -2,7 +2,7 @@
 
 import { X, Stethoscope, CheckCircle2, ShieldAlert, Building2, Phone, Mail, Award, Calendar, Briefcase } from "lucide-react";
 
-export default function ViewDoctorModal({ doctor, onClose, onVerify, onBlock }) {
+export default function ViewDoctorModal({ doctor, onClose }) {
   if (!doctor) return null;
 
   const createdAt = doctor.createdAt ? new Date(doctor.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
@@ -129,28 +129,8 @@ export default function ViewDoctorModal({ doctor, onClose, onVerify, onBlock }) 
           <p className="text-[11px] text-slate-500">Registered on: {createdAt}</p>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => onVerify(doctor._id, !doctor.isVerified)}
-              className={`px-4 py-2 rounded-xl font-bold text-xs transition-all ${
-                doctor.isVerified
-                  ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                  : "bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20"
-              }`}
-            >
-              {doctor.isVerified ? "Unverify License" : "Verify License"}
-            </button>
-            <button
-              onClick={() => onBlock(doctor._id, !doctor.isActive)}
-              className={`px-4 py-2 rounded-xl font-bold text-xs transition-all ${
-                doctor.isActive !== false
-                  ? "bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30"
-                  : "bg-blue-600 text-white hover:bg-blue-500"
-              }`}
-            >
-              {doctor.isActive !== false ? "Deactivate Account" : "Activate Account"}
-            </button>
-            <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold text-xs"
+              className="px-5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold text-xs transition-all"
             >
               Close
             </button>

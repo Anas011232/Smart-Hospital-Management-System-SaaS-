@@ -55,6 +55,50 @@ import { emitQueueUpdate, getIO } from "../socket/queue.socket.js";
 
 
 
+const isDayMatching = (availableDays, dateObj) => {
+  if (!availableDays) return true;
+
+  let daysArray = [];
+  if (Array.isArray(availableDays)) {
+    daysArray = availableDays
+      .flatMap((item) => String(item).split(","))
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+  } else if (typeof availableDays === "string") {
+    daysArray = availableDays
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+  }
+
+  if (daysArray.length === 0) return true;
+
+  if (daysArray.some((d) => ["everyday", "daily", "all", "all days", "every day"].includes(d))) {
+    return true;
+  }
+
+  const targetDayNum = dateObj.getDay();
+
+  const dayMap = {
+    0: ["sun", "sunday", "su"],
+    1: ["mon", "monday", "mo"],
+    2: ["tue", "tues", "tuesday", "tu"],
+    3: ["wed", "wednesday", "we"],
+    4: ["thu", "thur", "thurs", "thursday", "th"],
+    5: ["fri", "friday", "fr"],
+    6: ["sat", "saturday", "sa"],
+  };
+
+  const validRepresentations = dayMap[targetDayNum] || [];
+
+  return daysArray.some((d) => {
+    const cleanD = d.toLowerCase().trim();
+    return validRepresentations.some(
+      (rep) => cleanD === rep || cleanD.startsWith(rep) || rep.startsWith(cleanD)
+    );
+  });
+};
+
 export const createAppointment = async (req, res) => {
   try {
     const db = getDB();
@@ -78,6 +122,17 @@ export const createAppointment = async (req, res) => {
       });
     }
 
+    // HOSPITAL VERIFICATION CHECK
+    if (doctor.hospitalId) {
+      const hospital = await db.collection("hospitals").findOne({ _id: new ObjectId(doctor.hospitalId) });
+      if (!hospital || !hospital.isVerified) {
+        return res.status(403).json({
+          success: false,
+          message: "This doctor's hospital is unverified. Appointments cannot be booked for unverified hospitals.",
+        });
+      }
+    }
+
     // DATE CHECK
     const appointmentDate = patientInfo.appointmentDate;
 
@@ -96,15 +151,7 @@ export const createAppointment = async (req, res) => {
     }
 
     // DAY CHECK
-    const dayNames = [
-      "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"
-    ];
-
-    const selectedDay = dayNames[selectedDate.getDay()];
-
-    const isAvailable = doctor.availableDays?.some(
-      (d) => d.trim().toLowerCase() === selectedDay.toLowerCase()
-    );
+    const isAvailable = isDayMatching(doctor.availableDays, selectedDate);
 
     if (!isAvailable) {
       return res.status(400).json({
@@ -114,17 +161,20 @@ export const createAppointment = async (req, res) => {
     }
 
     // DAILY LIMIT ONLY
-    const totalPatients = await db.collection("appointments").countDocuments({
-      doctorId: new ObjectId(doctorId),
-      "patientInfo.appointmentDate": appointmentDate,
-      status: { $ne: "cancelled" },
-    });
-
-    if (totalPatients >= doctor.maxPatientsPerDay) {
-      return res.status(400).json({
-        success: false,
-        message: "Daily patient limit reached",
+    const maxPatients = Number(doctor.maxPatientsPerDay || 0);
+    if (maxPatients > 0) {
+      const totalPatients = await db.collection("appointments").countDocuments({
+        doctorId: new ObjectId(doctorId),
+        "patientInfo.appointmentDate": appointmentDate,
+        status: { $ne: "cancelled" },
       });
+
+      if (totalPatients >= maxPatients) {
+        return res.status(400).json({
+          success: false,
+          message: `Daily appointment limit (${maxPatients}) reached for this date. Please choose another date.`,
+        });
+      }
     }
 
     // SERIAL
@@ -885,5 +935,51 @@ export const cancelAppointment = async (req, res) => {
       success: false,
       message: err.message,
     });
+  }
+};
+
+export const checkDoctorDateAvailability = async (req, res) => {
+  try {
+    const db = getDB();
+    const { doctorId } = req.params;
+    const { date } = req.query;
+
+    if (!doctorId || !ObjectId.isValid(doctorId)) {
+      return res.status(400).json({ success: false, message: "Invalid Doctor ID" });
+    }
+
+    const doctor = await db.collection("doctors").findOne({ _id: new ObjectId(doctorId) });
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
+
+    const maxPatients = Number(doctor.maxPatientsPerDay || 0);
+    let bookedCount = 0;
+
+    if (date) {
+      bookedCount = await db.collection("appointments").countDocuments({
+        doctorId: new ObjectId(doctorId),
+        "patientInfo.appointmentDate": date,
+        status: { $ne: "cancelled" },
+      });
+    }
+
+    const isFull = maxPatients > 0 && bookedCount >= maxPatients;
+
+    let chamberTime = "Chamber Schedule";
+    if (doctor.startTime && doctor.endTime) {
+      chamberTime = `${doctor.startTime} - ${doctor.endTime}`;
+    }
+
+    res.json({
+      success: true,
+      bookedCount,
+      maxPatients,
+      isFull,
+      remaining: maxPatients > 0 ? Math.max(0, maxPatients - bookedCount) : null,
+      chamberTime,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };

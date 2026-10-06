@@ -116,6 +116,21 @@ function Field({ field, value, onChange }) {
 
   const spanClass = field.span === 2 ? "md:col-span-2" : "";
 
+  const handleDayClick = (dayStr) => {
+    let currentDays = value ? value.split(",").map((s) => s.trim()).filter(Boolean) : [];
+    if (dayStr === "Everyday") {
+      currentDays = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    } else {
+      if (currentDays.includes(dayStr)) {
+        currentDays = currentDays.filter((d) => d !== dayStr);
+      } else {
+        currentDays.push(dayStr);
+      }
+    }
+    const newValue = currentDays.join(", ");
+    onChange({ target: { name: field.name, value: newValue } });
+  };
+
   return (
     <div className={`flex flex-col gap-1.5 ${spanClass}`}>
       <label className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
@@ -141,14 +156,37 @@ function Field({ field, value, onChange }) {
           className={`${base} resize-none`}
         />
       ) : (
-        <input
-          type={field.type}
-          name={field.name}
-          value={value}
-          onChange={onChange}
-          placeholder={field.placeholder}
-          className={base}
-        />
+        <div className="flex flex-col gap-2">
+          <input
+            type={field.type}
+            name={field.name}
+            value={value}
+            onChange={onChange}
+            placeholder={field.placeholder}
+            className={base}
+          />
+          {field.name === "availableDays" && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Everyday"].map((day) => {
+                const isSelected = value?.toLowerCase().includes(day.toLowerCase());
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => handleDayClick(day)}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                      isSelected
+                        ? "bg-cyan-500/20 border-cyan-500 text-cyan-300 font-semibold"
+                        : "bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-200"
+                    }`}
+                  >
+                    + {day}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -230,10 +268,34 @@ export default function AddDoctor() {
   //   }
   // };
 
-  // ── section navigation ──
-  
+  const sectionIds = SECTIONS.map((s) => s.id);
+  const activeIdx = sectionIds.indexOf(activeSection);
+  const isLastStep = activeIdx === SECTIONS.length - 1;
+
+  const goNext = () => {
+    if (!completedSections.includes(activeSection)) {
+      setCompletedSections((prev) => [...prev, activeSection]);
+    }
+    if (activeIdx < SECTIONS.length - 1) {
+      setActiveSection(sectionIds[activeIdx + 1]);
+    }
+  };
+
+  const goPrev = () => {
+    if (activeIdx > 0) setActiveSection(sectionIds[activeIdx - 1]);
+  };
+
+  const handleStepClick = (id) => setActiveSection(id);
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    // If not on the last step (Fees & Schedule), advance to next step instead of submitting
+    if (!isLastStep) {
+      goNext();
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -257,57 +319,40 @@ export default function AddDoctor() {
         return;
       }
 
-    const data = new FormData();
+      const data = new FormData();
 
-    Object.entries(form).forEach(([key, value]) => {
-      data.append(key, value || "");
-    });
+      Object.entries(form).forEach(([key, value]) => {
+        data.append(key, value || "");
+      });
 
-    data.append("hospitalId", hospitalId);
+      data.append("hospitalId", hospitalId);
 
-    if (image) {
-      data.append("photo", image);
-    }
-
-    const res = await api.post(
-      "/doctors",
-      data,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      if (image) {
+        data.append("photo", image);
       }
-    );
 
-    setSaveSuccess(true);
-    setTimeout(() => router.push("/hospital/doctors"), 1200);
+      const res = await api.post(
+        "/doctors",
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-  } catch (err) {
-    console.log("ERROR:", err.response?.data || err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-  const sectionIds = SECTIONS.map((s) => s.id);
-  const activeIdx = sectionIds.indexOf(activeSection);
+      setSaveSuccess(true);
+      setTimeout(() => router.push("/hospital/doctors"), 1200);
 
-  const goNext = () => {
-    if (!completedSections.includes(activeSection)) {
-      setCompletedSections((prev) => [...prev, activeSection]);
-    }
-    if (activeIdx < SECTIONS.length - 1) {
-      setActiveSection(sectionIds[activeIdx + 1]);
+    } catch (err) {
+      console.log("ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Failed to save doctor");
+    } finally {
+      setLoading(false);
     }
   };
-
-  const goPrev = () => {
-    if (activeIdx > 0) setActiveSection(sectionIds[activeIdx - 1]);
-  };
-
-  const handleStepClick = (id) => setActiveSection(id);
 
   const currentSection = SECTIONS.find((s) => s.id === activeSection);
-  const isLastStep = activeIdx === SECTIONS.length - 1;
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
