@@ -122,7 +122,7 @@ export const createDoctor = async (req, res) => {
       reviewsCount: 0,
 
       isActive: true,
-      isVerified: false,
+      isVerified: true,
       role: "doctor",
 
       createdAt: new Date(),

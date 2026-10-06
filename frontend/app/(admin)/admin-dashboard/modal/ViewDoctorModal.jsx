@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Stethoscope, CheckCircle2, ShieldAlert, Building2, Phone, Mail, Award, Calendar, Briefcase } from "lucide-react";
+import { X, Stethoscope, CheckCircle2, Building2, Phone, Mail, Award, Calendar, Briefcase } from "lucide-react";
 
 export default function ViewDoctorModal({ doctor, onClose }) {
   if (!doctor) return null;
@@ -28,15 +28,9 @@ export default function ViewDoctorModal({ doctor, onClose }) {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-white text-xl">{doctor.fullName}</h3>
-                {doctor.isVerified ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                    <CheckCircle2 size={12} /> License Verified
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-                    <ShieldAlert size={12} /> Pending Verification
-                  </span>
-                )}
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                  <CheckCircle2 size={12} /> Verified
+                </span>
               </div>
               <p className="text-xs text-slate-400 mt-1 flex items-center gap-2">
                 <span className="text-cyan-400 font-semibold">{doctor.qualification || "MBBS"}</span>

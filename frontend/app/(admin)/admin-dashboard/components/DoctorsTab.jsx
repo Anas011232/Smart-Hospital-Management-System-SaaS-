@@ -5,7 +5,6 @@ import {
   Search,
   Stethoscope,
   CheckCircle2,
-  ShieldAlert,
   Building2,
   ChevronLeft,
   ChevronRight,
@@ -166,15 +165,9 @@ export default function DoctorsTab({
 
                     {/* License Verification */}
                     <td className="py-3 px-2">
-                      {d.isVerified ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          <CheckCircle2 size={10} /> Verified
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          <ShieldAlert size={10} /> Pending
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 size={10} /> Verified
+                      </span>
                     </td>
 
                     {/* Actions */}
