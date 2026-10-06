@@ -1,9 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDB } from "../config/db.js";
 
-// ==========================================
-// 1. SAAS PLATFORM METRICS & STATS
-// ==========================================
 export const getStats = async (req, res) => {
   try {
     const db = getDB();
